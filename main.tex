@@ -1,0 +1,258 @@
+\input{configuration}
+\begin{document}
+\include{front_matter}
+
+% add \newEmptyPage\  before chapters name if chapters starts on even page
+
+\chapter{Introduction}
+\section{Context and Motivation}
+The modern financial services industry relies heavily on data-driven decision-making to manage credit card portfolios, assess customer segments, target audiences, and optimize campaign profitability \cite{sargeant_algorithmic_2023}. However, much of this segmentation currently depends on manually defined rules and heuristics, which are typically formulated through an analyst's extensive, hands-on experience with the data.
+
+However, this manual approach is inherently unscalable. As data volumes grow and the dimensionality of available features increases, human-driven analysis can only accommodate an ever-decreasing fraction of the true complexity within the customer base. To overcome these limitations, unsupervised machine learning offers a promising, data-driven alternative. The objective of applying this methodology is not merely to search for hidden anomalies, but first and foremost to demonstrate that algorithmic approaches can reliably identify and group standard, expected behavioral patterns. By successfully capturing this foundational business logic as a baseline, the method can then be further leveraged to uncover complex, latent customer segments derived from highly nuanced account behavior. Ultimately, this research aims to show how such techniques can provide a comprehensive and scalable segmentation strategy free from rigid, predefined assumptions.
+
+\section{Problem Statement}
+Despite the availability of comprehensive transactional and profitability data, translating these raw operational databases into cohesive customer segments presents a significant engineering and analytical challenge. Financial datasets are inherently complex: they are characterized by millions of records, high dimensionality, and multiple time horizons. Furthermore, transactional columns are frequently sparse (zero-heavy), which poses a unique hurdle for unsupervised learning algorithms to process effectively.
+
+The core problem addressed in this thesis is the design and implementation of an end-to-end data processing and clustering pipeline capable of navigating this complexity. To generate meaningful insights, the raw data must be carefully aggregated, filtered, and engineered to ensure that highly correlated features do not skew the results. Ultimately, the challenge lies in building a scalable methodology that can distill raw financial data into distinct, economically interpretable customer segments.
+
+\section{Research Objectives}
+To address this problem, this thesis is guided by the following primary research objectives:
+
+\begin{enumerate}
+    \item \textbf{Develop a Scalable Data Aggregation Pipeline:} Construct a robust methodology to merge and summarize diverse financial databases into unified annual feature profiles.
+    
+    \item \textbf{Execute Unsupervised Customer Segmentation:} Apply clustering algorithms to the engineered dataset to empirically identify distinct groups of credit card agreements, utilizing quantitative scoring metrics to determine the optimal number of segments.
+    
+    \item \textbf{Profile Financial and Behavioral Characteristics:} Interpret the resulting clusters by analyzing their defining features, such as spending behavior across different categories
+\end{enumerate}
+
+\section{Scope and Limitations}
+The scope of this research is defined by a targeted sample of approximately 50,000 unique credit card agreements, focusing specifically on annual aggregated data for the years 2024 and 2025.
+
+A primary limitation of this study is the inherent nature of unsupervised learning; because the data lacks ground-truth customer labels, validation relies on internal mathematical heuristics rather than predictive accuracy. Additionally, by aggregating to an annual level, seasonality and short-term behavioral shifts may be smoothed over or obscured.
+
+\section{Thesis Structure}
+The remainder of this thesis is structured as follows. Chapter \ref{chap:Background} provides the theoretical background, detailing the financial metrics and unsupervised machine learning algorithms utilized in this study. Chapter \ref{chap:Methodology} outlines the methodology, documenting the data engineering pipeline, feature selection process, and the experimental setup for the clustering model. Chapter \ref{chap:Results} presents the results, illustrating the optimal cluster formations and providing a detailed financial interpretation of each customer segment. Finally, Chapter 5 concludes the thesis by discussing the business implications of these findings and proposing avenues for future research.
+
+\chapter{Background}
+\label{chap:Background}
+This chapter establishes the theoretical foundation for the methodologies applied in this research. It first explores the domain of credit card portfolio management and standard financial metrics. Subsequently, it details the mathematical principles behind unsupervised machine learning, specifically focusing on dimensionality reduction techniques, clustering algorithms, and the quantitative metrics used to evaluate them.
+
+    \section{Customer Segmentation in Retail Banking}
+    \label{sec:banking_segmentation}
+    In the financial services sector, credit card portfolios represent a complex ecosystem of customer behaviors, borrowing habits, and repayment patterns. Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the RFM (Recency, Frequency, Monetary) model to assess risk and profitability. While this manual, rule-based approach is effective for simple datasets, it struggles to scale and capture the nuances of high-dimensional data. Consequently, modern analytical approaches do not discard these foundational metrics; instead, they integrate core RFM variables with additional behavioral and demographic features to serve as inputs for unsupervised machine learning models. This evolution allows institutions to algorithmically discover latent, multivariate patterns rather than relying on rigid, human-defined heuristics \cite{yan_bank_2025}.
+
+    \section{Unsupervised Machine Learning}
+    \label{sec:unsupervised_ml}
+
+    Unlike supervised machine learning, which relies on a set of labeled training data to predict a known target variable, unsupervised machine learning focuses on discovering hidden structures and intrinsic patterns within unlabeled datasets. The primary objective of an unsupervised algorithm is not to map inputs to a predefined output, but rather to infer the natural topology, relationships, or distributions inherent in the data itself \cite{naeem_unsupervised_2023}.
+    
+    In the context of financial customer segmentation, ground-truth labels defining distinct "customer archetypes" are rarely known in advance. While traditional approaches attempt to force customers into rigid, predefined demographic or financial buckets, unsupervised learning provides a purely data-driven methodology. By algorithmically evaluating the multivariate similarities across diverse account features, such as transaction categories, utilization rates, and repayment behaviors, unsupervised models can autonomously partition the customer base into cohesive, economically meaningful segments without human bias.
+    
+        \subsection{K-means}
+        \label{subsec:kmeans}
+        
+        In our study our primary focus will be on the $K$-means clustering algorithm \cite{naeem_unsupervised_2023}. Its computational efficiency and robust theoretical foundation make it particularly well-suited for partitioning large-scale, multidimensional financial datasets.
+        
+        The $K$-means algorithm aims to partition a given dataset into $K$ distinct, non-overlapping clusters by minimizing the intra-cluster variance, commonly referred to as the Within-Cluster Sum of Squares (WCSS). Let our financial dataset be represented as an $n \times d$ matrix, where we have $n$ observations $X = \{x_1, x_2, \dots, x_n\}$ and each observation $x_i \in \mathbb{R}^d$ is a $d$-dimensional vector of financial features. We seek to partition the dataset into a set of $K$ clusters $S = \{S_1, S_2, \dots, S_K\}$, where $K \le n$.
+        
+        The formal objective is to find the assignment of data points to clusters that minimizes the following cost function:
+        
+        \begin{equation}
+        \label{eq:kmeanscost}
+            J(S) = \sum_{i=1}^{K} \sum_{x \in S_i} \|x - \mu_i\|^2
+        \end{equation}
+        
+        where $\mu_i$ represents the geometric centroid (or mean) of the points assigned to cluster $S_i$, and $\|x - \mu_i\|^2$ denotes the squared Euclidean distance between a data point and its respective cluster centroid.
+        
+        Because finding the exact global optimum for this problem is NP-hard, $K$-means typically employs an iterative refinement technique known as Lloyd's algorithm. The process begins by initializing $K$ centroids, $\mu_1^{(0)}, \mu_2^{(0)}, \dots, \mu_K^{(0)}$, often chosen randomly from the dataset or via methods such as $K$-means++ to improve convergence speed and avoid poor local minima \cite{arthur_k-means_2007}. The algorithm then alternates between two core operations:
+        
+        \begin{enumerate}
+            \item \textbf{Assignment Step:} Each data point is assigned to the cluster whose centroid yields the least squared Euclidean distance. For the $t$-th iteration, the updated cluster $S_i^{(t)}$ is defined mathematically as:
+            \begin{equation}
+                S_i^{(t)} = \left\{ x_p : \|x_p - \mu_i^{(t)}\|^2 \le \|x_p - \mu_j^{(t)}\|^2 \ \forall j, 1 \le j \le K \right\}
+            \end{equation}
+        
+            \item \textbf{Update Step:} Once all data points have been assigned, the new centroids for the $(t+1)$-th iteration are recalculated as the center of mass of the points in each respective cluster:
+            \begin{equation}
+                \mu_i^{(t+1)} = \frac{1}{|S_i^{(t)}|} \sum_{x_j \in S_i^{(t)}} x_j
+            \end{equation}
+        \end{enumerate}
+        
+        These two steps are repeated iteratively until convergence is achieved—specifically, when the cluster assignments no longer change ($S_i^{(t)} = S_i^{(t-1)}$), or when a predefined tolerance for the reduction in WCSS is met. By mathematically minimizing the variance within each grouping, the algorithm organically isolates distinct customer archetypes defined by their shared multivariate financial behaviors.
+
+        \subsection{K-median}
+        \label{subsec:kmedian}
+        
+        While the $K$-means algorithm is computationally efficient, its reliance on squared Euclidean distances makes it inherently sensitive to outliers. In financial datasets, where extreme values are common, these outliers can disproportionately skew the cluster centroids. To address this vulnerability, the $K$-median clustering algorithm serves as a robust alternative.
+        
+        Instead of minimizing the variance, $K$-median aims to partition the dataset by minimizing the absolute deviations between data points and their cluster centers. Using the same dataset matrix $X$ and cluster set $S$ defined previously, the formal objective of $K$-median is to find the assignment that minimizes the following cost function:
+        
+        \begin{equation}
+        \label{eq:kmediancost}
+            J_{median}(S) = \sum_{i=1}^{K} \sum_{x \in S_i} \|x - m_i\|_1
+        \end{equation}
+        
+        where $m_i$ represents the median vector of the points assigned to cluster $S_i$, and $\|x - m_i\|_1$ denotes the $L_1$ norm, commonly known as the Manhattan distance, between a data point and its cluster median. 
+        
+        Similar to $K$-means, the optimization of this cost function is achieved through an iterative heuristic framework. After initializing $K$ medians, $m_1^{(0)}, m_2^{(0)}, \dots, m_K^{(0)}$, the algorithm alternates between the following two operations:
+        
+        \begin{enumerate}
+            \item \textbf{Assignment Step:} Each data point is assigned to the cluster whose median yields the smallest $L_1$ distance. For the $t$-th iteration, the assignment is mathematically defined as:
+            \begin{equation}
+                S_i^{(t)} = \left\{ x_p : \|x_p - m_i^{(t)}\|_1 \le \|x_p - m_j^{(t)}\|_1 \ \forall j, 1 \le j \le K \right\}
+            \end{equation}
+        
+            \item \textbf{Update Step:} Once all data points are assigned, the new median for the $(t+1)$-th iteration is computed. Unlike the arithmetic mean, the multidimensional median is calculated independently for each feature dimension $f$:
+            \begin{equation}
+                (m_i^{(t+1)})_f = \text{median} \left( \{ (x_j)_f : x_j \in S_i^{(t)} \} \right) \quad \forall f \in \{1, 2, \dots, d\}
+            \end{equation}
+            where $(m_i)_f$ and $(x_j)_f$ denote the $f$-th feature component of the respective vectors.
+        \end{enumerate}
+        
+        These steps repeat until convergence. By substituting the mean with the median and the squared $L_2$ norm with the $L_1$ norm, the $K$-median algorithm effectively prevents extreme financial anomalies from dominating the spatial definition of the clusters, resulting in more representative and economically stable customer archetypes.
+
+        \subsection{Principal Component Analysis (PCA)}
+        \label{subsec:pca}
+        
+        While partitioning algorithms like $K$-means and $K$-median group observations into distinct clusters, financial datasets are frequently characterized by high dimensionality. As the number of features $d$ increases, the concept of distance becomes inherently less discriminative, this is a mathematical phenomenon widely known as the curse of dimensionality. To mitigate this, Principal Component Analysis (PCA) is often employed as a preliminary unsupervised learning step to reduce the feature space while preserving the maximum possible variance of the original dataset \cite{naeem_unsupervised_2023}.
+        
+        Given our centered dataset matrix $X \in \mathbb{R}^{n \times d}$ (where the empirical mean of each feature column has been shifted to zero), PCA seeks an orthogonal linear transformation that projects the data into a new $k$-dimensional subspace, where $k < d$. The objective is to find a set of $k$ orthogonal direction vectors, known as principal components, that maximize the variance of the projected data.
+        
+        The spatial relationships between the features are captured by the $d \times d$ sample covariance matrix, defined mathematically as:
+        \begin{equation}
+            \Sigma = \frac{1}{n-1} X^T X
+        \end{equation}
+        
+        To find the principal components that maximize variance, we solve the algebraic eigenvalue problem for the covariance matrix:
+        \begin{equation}
+            \Sigma w_j = \lambda_j w_j
+        \end{equation}
+        
+        where $w_j \in \mathbb{R}^d$ represents the $j$-th eigenvector and $\lambda_j$ is its corresponding eigenvalue. In this context, the eigenvector dictates the direction of the principal axis, while the eigenvalue strictly quantifies the magnitude of the dataset's variance explained along that specific axis. 
+        
+        By sorting the eigenvalues in descending order ($\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_d$), we identify the orthogonal directions that capture the most intrinsic information. The first $k$ eigenvectors are concatenated to form the projection matrix $W_k = [w_1, w_2, \dots, w_k] \in \mathbb{R}^{d \times k}$. The original high-dimensional dataset is then mapped into the reduced subspace via the linear transformation:
+        \begin{equation}
+            X_{reduced} = X W_k
+        \end{equation}
+        
+        In the context of financial customer segmentation, applying PCA prior to $K$-means clustering effectively filters out stochastic noise and redundant, collinear variables (such as highly correlated transaction categories). This dimensionality reduction not only accelerates the iterative descent optimization discussed in Section \ref{sec:descent_optimization}, but also stabilizes the resulting cluster assignments by grounding the Euclidean distance calculations exclusively in the most statistically significant dimensions.
+
+    \section{Iterative Descent Optimization}
+    \label{sec:descent_optimization}
+    
+    To understand the mechanics of large-scale clustering, it is necessary to first establish the general principles of iterative descent optimization. In applied machine learning, optimization problems frequently require minimizing a differentiable scalar cost function, $J(\theta)$, parameterized by a vector $\theta \in \mathbb{R}^p$. 
+    
+    When analytical solutions are computationally intractable or mathematically impossible to derive, iterative methods such as Gradient Descent are employed. The standard descent procedure updates the parameters by taking a step in the direction of the negative gradient of the cost function evaluated over the entire dataset $X$:
+    
+    \begin{equation}
+        \theta^{(t+1)} = \theta^{(t)} - \alpha \nabla J(\theta^{(t)}; X)
+    \end{equation}
+    
+    where $\alpha > 0$ is the learning rate, controlling the step size. For strictly convex cost functions, moving opposite the gradient guarantees monotonic convergence to a unique global minimum. However, many practical cost functions are non-convex. In such spaces, standard descent guarantees convergence only to a local minimum or a stationary point where $\nabla J(\theta) = 0$, provided the learning rate is sufficiently small.
+    
+        \subsection{Stochastic Methods and Convergence Properties}
+        \label{subsec:stochastic_convergence}
+    
+        Evaluating the full gradient $\nabla J(\theta^{(t)}; X)$ at every iteration $t$ is computationally prohibitive for massive datasets ($n \gg 1$). Stochastic gradient methods bypass this bottleneck by approximating the true gradient using a small, randomly sampled subset of the data, $B \subset X$, known as a mini-batch. The update rule becomes:
+    
+        \begin{equation}
+            \theta^{(t+1)} = \theta^{(t)} - \alpha_t \nabla J_B(\theta^{(t)}; B)
+        \end{equation}
+    
+        Because the mini-batch gradient $\nabla J_B$ is an unbiased estimator of the true gradient (i.e., $\mathbb{E}[\nabla J_B] = \nabla J$), the algorithm still descends the cost surface in expectation. However, the stochastic noise introduced by random sampling causes the update path to oscillate. 
+    
+        To mathematically guarantee convergence in the presence of this stochastic noise, the learning rate $\alpha_t$ cannot remain constant. It must satisfy the Robbins-Monro conditions for stochastic approximation:
+    
+        \begin{equation}
+        \label{eq:robbins_monro}
+            \sum_{t=1}^{\infty} \alpha_t = \infty \quad \text{and} \quad \sum_{t=1}^{\infty} \alpha_t^2 < \infty
+        \end{equation}
+    
+        The first condition ensures that the algorithm can travel infinitely far to reach the minimum, regardless of the initial starting point. The second condition ensures that the variance of the updates decays over time, allowing the algorithm to settle into the local minimum rather than perpetually bouncing around it. Under these conditions, stochastic mini-batch descent converges almost surely to a local stationary point, even for non-convex objective functions \cite{robbins_stochastic_1951}.
+    
+    \section{Mini-Batch K-means}
+    \label{sec:minibatch_kmeans}
+    
+    The principles of stochastic descent provide the theoretical foundation for the Mini-Batch $K$-means algorithm. As established in Equation \ref{eq:kmeanscost}, the $K$-means cost function (WCSS) is inherently non-convex, meaning optimization relies on finding a stable local minimum.
+    
+    In standard $K$-means (Lloyd's algorithm), computing the distance between all $n$ points and $K$ centroids during the assignment step is analogous to a full batch evaluation, which scales poorly. Mini-Batch $K$-means mitigates this by applying stochastic optimization to the centroid updates \cite{sculley_web-scale_2010}.
+    
+    At iteration $t$, a random mini-batch $B$ of size $b$ is drawn from the dataset. Let $B_i \subset B$ represent the subset of points in the mini-batch assigned to the $i$-th centroid, $\mu_i$. Instead of replacing the centroid entirely, the algorithm performs an incremental update that shifts the centroid toward the mean of the new data points. This is fundamentally a stochastic gradient descent step on the WCSS cost function.
+    
+    Crucially, the algorithm maintains a per-center count, $v_{i, t}$, which tracks the cumulative number of data points assigned to centroid $\mu_i$ up to iteration $t$. The centroid is updated as follows:
+    
+    \begin{equation}
+        \mu_i^{(t+1)} = \mu_i^{(t)} + \frac{1}{v_{i, t}} \sum_{x \in B_i} \left( x - \mu_i^{(t)} \right)
+    \end{equation}
+    
+    This update mechanism elegantly reveals the underlying learning rate of the algorithm: $\alpha_t = \frac{1}{v_{i, t}}$. Because the cumulative point count $v_{i, t}$ increases linearly with the number of iterations, the learning rate decays proportionally to $1/t$. 
+    
+    This specific decay rate perfectly satisfies the Robbins-Monro convergence criteria (Equation \ref{eq:robbins_monro}), since the harmonic series diverges ($\sum \frac{1}{t} = \infty$) while the sum of its squares converges ($\sum \frac{1}{t^2} < \infty$). Therefore, Mini-Batch $K$-means is theoretically guaranteed to converge to a stable local optimum. By framing the centroid shifts as stochastic gradient updates with a naturally decaying learning rate, the algorithm achieves drastic reductions in computational complexity without sacrificing theoretical convergence guarantees.
+            
+\newEmptyPage\
+\chapter{Methodology}
+\label{chap:Methodology}
+\lipsum[1]
+
+    \section{Section}
+    \lipsum[1]
+    
+        \subsection{Subsection}
+        \lipsum[1]
+        
+        \subsection{Subsection}
+        \lipsum[2]
+
+    \section{Section}
+    \lipsum[1]
+    
+        \subsection{Subsection}
+        \lipsum[1]
+        
+        \subsection{Subsection}
+        \lipsum[2]
+
+\newEmptyPage\
+\chapter{Results}
+\label{chap:Results}
+\lipsum[1]
+
+    \begin{itemize}
+      \item Phasellus eu tellus sit amet tortor gravida placerat.
+      \item Praesent eget sem vel leo ultrices bibendum.
+      \item Aenean faucibus. Morbi dolor nulla, malesuada eu, pulvinar at, mollis ac, nulla.
+    \end{itemize}
+    
+ \lipsum[2]
+ Here is an example of reference to the Figure \ref{fig:fig1}. 
+
+    \begin{figure}[h] 
+      \centering
+      \includegraphics[width=0.6\textwidth]{Figures/Fig1.jpg} 
+      \caption{This is a caption} 
+      \label{fig:fig1} % Optional label for cross-referencing
+    \end{figure}
+
+\lipsum[3]
+
+    \begin{table}[h]
+      \centering
+      \caption{Example Table}
+      \label{tab:example}
+      \begin{tabular}{ccc}
+        \toprule
+        \textbf{Column 1} & \textbf{Column 2} & \textbf{Column 3} \\
+        \midrule
+        Row 1, Col 1 & Row 1, Col 2 & Row 1, Col 3 \\
+        Row 2, Col 1 & Row 2, Col 2 & Row 2, Col 3 \\
+        Row 3, Col 1 & Row 3, Col 2 & Row 3, Col 3 \\
+        \bottomrule
+      \end{tabular}
+    \end{table}
+
+\lipsum[4]
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

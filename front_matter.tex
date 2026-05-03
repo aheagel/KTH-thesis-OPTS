@@ -1,0 +1,185 @@
+
+
+
+\newcommand\SubjectArea{Degree Project in Optimization and Systems Theory}
+
+\newcommand\Cycle{Second cycle, 30 credits}
+
+\newcommand\ThesisTitle{Clustering Financial Profiles: Evaluating Segmentation Effectiveness on Customer Bank Data}
+
+\newcommand\ThesisSubtitle{A Comprehensive Study on Unsupervised Clustering Methods for High-Dimensional Financial Profile Data}
+
+
+\newcommand\ThesisAuthor{Anh Do}
+
+\newcommand\TitlePageText{
+    Master’s Programme, Applied and Computational Mathermatic, Optimization and Systems Theory track\break
+    Supervisor: \break
+    Examiner: \break
+    School of Engineering Sciences\break
+    Host company: TF Bank AB\break
+    Swedish title: Klustering av finansiella profiler: Utvärdering av segmenteringens effektivitet för finansiella kunddata\break
+    Swedish subtitle: En omfattande studie av oövervakade klusteringsmetoder för högdimensionell finansiell kunddata
+    
+}
+\newcommand\AddCompanyLogo{
+    \includegraphics[width=2cm]{Figures/Avarda_bank_logo_2024.svg.png}
+} %leave empty if no company 
+
+
+\newcommand\AbstractEnglish{
+The application of modern mathematical methods within financial institutions is well established, particularly in areas such as asset pricing, credit risk assessment, and portfolio optimization, where advanced mathematical modeling forms the core analytical foundation. In contrast, more traditional tasks such as customer segmentation have historically relied on manual rule-based approaches and domain-specific business knowledge rather than formal mathematical frameworks.
+
+This thesis investigates the feasibility and effectiveness of applying unsupervised clustering methods to customer segmentation using high-dimensional financial data. The study presents a complete methodological pipeline, beginning with raw transactional and account-level data and proceeding through feature construction, normalization, dimensional control, and distance-based clustering. Emphasis is placed on the mathematical challenges inherent to clustering in high-dimensional spaces, including metric selection, feature scaling, correlation, and robustness to skewed distributions.
+
+Using distance-based unsupervised learning algorithms, the resulting clusters are evaluated through internal validation measures and statistical comparison of cluster-specific feature distributions. The thesis further examines the temporal stability of cluster assignments across consecutive periods. The results demonstrate both the potential and the limitations of unsupervised clustering as a mathematically grounded approach to customer segmentation in financial data.
+}
+
+\newcommand\KeywordsEnglish{
+Unsupervised clustering,
+High-dimensional data,
+Distance metrics,
+Feature preprocessing,
+Applied mathematics
+}
+
+\newcommand\AbstractSwedish{
+Användningen av moderna matematiska metoder inom finansiella institutioner är sedan länge väletablerad, särskilt inom områden som tillgångsprissättning, kreditriskbedömning och portföljoptimering, där avancerad matematisk modellering utgör den centrala analytiska grunden. Däremot har mer traditionella uppgifter, såsom kundsegmentering, historiskt sett i större utsträckning baserats på manuella regelbaserade metoder och domänspecifik affärskunskap snarare än formella matematiska ramverk.
+
+Denna examensarbete undersöker möjligheterna och effektiviteten hos oövervakade klusteringsmetoder för kundsegmentering baserad på högdimensionell finansiell data. Studien presenterar en komplett metodologisk pipeline, från rå transaktions- och kontodata till konstruktion av egenskaper, normalisering, dimensionskontroll och avståndsbaserad klustering. Särskild tonvikt läggs vid de matematiska utmaningar som är förknippade med klustering i högdimensionella rum, inklusive val av metriker, egenskapsskalning, korrelation samt robusthet mot snedfördelade variabler.
+
+Med hjälp av avståndsbaserade oövervakade inlärningsalgoritmer utvärderas de resulterande klustren genom interna valideringsmått samt statistiska jämförelser av klusterspecifika egenskapsfördelningar. Vidare analyseras den temporala stabiliteten hos klustertillhörighet över på varandra följande tidsperioder. Resultaten påvisar både potentialen och begränsningarna hos oövervakad klustering som en matematiskt förankrad metod för kundsegmentering av finansiell data.
+}
+
+\newcommand\KeywordsSwedish{
+Oövervakad inlärning,
+Högdimensionell data,
+Avståndsbaserade metoder,
+Dataförberedelse,
+Tillämpad matematik
+}
+\newcommand\Acknowledgments{
+I would like to express my sincere gratitude to Hampus Nyquist, Wilhelm Back, Yueqi Cao, and Carlos Eduardo for their support throughout the entire process, from data processing to modeling and validation.
+}
+
+  %%%%% cover page %%%%%
+\pagestyle{plain}
+\pagenumbering{gobble}
+\begin{textblock*}{\paperwidth}(0cm,1.25cm)
+    \centering 
+    \includegraphics[width=3.75cm]{Figures/KTH_logo.png}
+\end{textblock*}
+
+\begin{textblock*}{15.86cm}(2.63cm, 8.62cm)
+    \setmainfont{Arial}
+    \centering 
+    \fontsize{12}{14}\selectfont
+    \SubjectArea\
+    \break
+    \fontsize{10}{14}\selectfont
+    \Cycle\
+\end{textblock*}
+
+\begin{textblock*}{15.86cm}(2.63cm, 11.13cm)
+    \setmainfont{Arial}
+    \centering        
+    \begin{spacing}{1.5}
+    \fontsize{24}{20}\selectfont
+    \textbf{ \ThesisTitle\ }
+    \end{spacing}    
+    \break
+    \break
+    \fontsize{16}{20}\selectfont
+    \ThesisSubtitle\ 
+    \break
+    \break
+    \fontsize{12}{20}\selectfont
+    \MakeUppercase{\textbf{ \ThesisAuthor\ }} 
+\end{textblock*}
+
+~\newEmptyPage\
+\newpage
+
+  %%%%% title page %%%%%
+
+\begin{textblock*}{\paperwidth}(0cm,1.25cm) 
+    \centering 
+    \includegraphics[width=3cm]{Figures/KTH_logo.png}
+\end{textblock*}
+
+\vspace*{2cm}
+\setmainfont{Figtree}
+\raggedleft  
+    \begin{spacing}{1.2}
+\fontsize{24}{26}\selectfont
+     \ThesisTitle\    
+     \end{spacing}
+\fontsize{16}{20}\selectfont
+    \ThesisSubtitle\ \break  \break
+
+\fontsize{16}{20}\selectfont
+
+ \ThesisAuthor\ 
+ 
+\vfill
+ \raggedright
+ \setmainfont{GeorgiaPro-Regular}
+ \fontsize{12}{14}\selectfont
+\TitlePageText\
+
+ \raggedleft
+  \AddCompanyLogo\  
+
+\newEmptyPage\
+\setlength{\parskip}{5.25pt}
+  %%%%% Abstracts %%%%%
+
+\chapter*{Abstract}
+    \raggedright
+    \setmainfont{GeorgiaPro-Regular}
+    \fontsize{12}{14}\selectfont
+    \AbstractEnglish\
+    
+    \setmainfont{GeorgiaPro-Bold}
+    \vspace*{1cm}
+    Keywords
+    
+    \setmainfont{GeorgiaPro-Regular}
+    \KeywordsEnglish\
+    
+\newEmptyPage\
+
+\chapter*{Sammanfattning}
+   \raggedright
+    \setmainfont{GeorgiaPro-Regular}
+    \fontsize{12}{14}\selectfont
+    \AbstractSwedish\
+    
+    \setmainfont{GeorgiaPro-Bold}
+    \vspace*{1cm}
+    Keywords
+    
+    \setmainfont{GeorgiaPro-Regular}
+    \KeywordsSwedish\
+
+
+\newEmptyPage\
+  %%%%% Acknowledgments and contents %%%%%
+\chapter*{Acknowledgments}
+\Acknowledgments\
+\newEmptyPage\
+
+\setmainfont{Figtree-Regular}
+\tableofcontents
+
+\newEmptyPage\
+
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+
+
+
+ 
