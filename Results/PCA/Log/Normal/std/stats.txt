@@ -1,0 +1,91 @@
+master_df shape: (999130, 586)
+Index type: MultiIndex
+Index names: ['Agreement_ID', 'Year']
+
+Total features before filtering: 29
+Excluded control columns: ['Dont Cluster', 'Label']
+
+NZV filter enabled: True
+Variance threshold: 0.0001
+Numeric candidates checked: 29
+Near-zero variance columns removed: 0
+Shape before NZV: (999128, 32)
+Shape after NZV:  (999128, 32)
+
+Numeric feature count: 29
+Correlation threshold: 0.9
+Highly correlated columns removed: 13
+Shape before: (999128, 32)
+Shape after:  (999128, 19)
+
+Dropped column -> Kept column (correlation):
+
+Total rows: 999,128
+Eligible for clustering (Dont Cluster == False): 999,128
+Excluded from clustering (Dont Cluster == True): 0
+X shape (numeric only, eligible rows): (999128, 7)
+
+Selected K based on silhouette score: 10 with silhouette score: 0.5330
+KMEANS_0: size=564630 Percentage of KMeans rows: 56.51%
+KMEANS_1: size=65150 Percentage of KMeans rows: 6.52%
+KMEANS_2: size=6402 Percentage of KMeans rows: 0.64%
+KMEANS_3: size=143169 Percentage of KMeans rows: 14.33%
+KMEANS_4: size=455 Percentage of KMeans rows: 0.05%
+KMEANS_5: size=32867 Percentage of KMeans rows: 3.29%
+KMEANS_6: size=76458 Percentage of KMeans rows: 7.65%
+KMEANS_7: size=60617 Percentage of KMeans rows: 6.07%
+KMEANS_8: size=48376 Percentage of KMeans rows: 4.84%
+KMEANS_9: size=1004 Percentage of KMeans rows: 0.10%
+
+Label sizes:
+Label
+KMEANS_0    564630
+KMEANS_1     65150
+KMEANS_2      6402
+KMEANS_3    143169
+KMEANS_4       455
+KMEANS_5     32867
+KMEANS_6     76458
+KMEANS_7     60617
+KMEANS_8     48376
+KMEANS_9      1004
+Name: count, dtype: int64
+
+Full labeled distribution (KMeans + hardcoded):
+Label
+KMEANS_0    0.565123
+KMEANS_1    0.065207
+KMEANS_2    0.006408
+KMEANS_3    0.143294
+KMEANS_4    0.000455
+KMEANS_5    0.032896
+KMEANS_6    0.076525
+KMEANS_7    0.060670
+KMEANS_8    0.048418
+KMEANS_9    0.001005
+Name: count, dtype: float64
+Time taken for K-Means clustering: 0.82 seconds
+
+Selected K based on silhouette score: 4 with silhouette score: 0.5156
+KMEDIAN_0: size=612628 Percentage of KMedians rows: 61.32%
+KMEDIAN_1: size=99281 Percentage of KMedians rows: 9.94%
+KMEDIAN_2: size=85889 Percentage of KMedians rows: 8.60%
+KMEDIAN_3: size=201330 Percentage of KMedians rows: 20.15%
+
+Label sizes:
+Label
+KMEDIAN_0    612628
+KMEDIAN_1     99281
+KMEDIAN_2     85889
+KMEDIAN_3    201330
+Name: count, dtype: int64
+
+Full labeled distribution (KMedians + hardcoded):
+Label
+KMEDIAN_0    0.613163
+KMEDIAN_1    0.099368
+KMEDIAN_2    0.085964
+KMEDIAN_3    0.201506
+Name: count, dtype: float64
+Time taken for K-Medians clustering: 8.87 seconds
+

@@ -27,7 +27,8 @@ To address this problem, this thesis is guided by the following primary research
 \end{enumerate}
 
 \section{Scope and Limitations}
-The scope of this research is defined by a targeted sample of approximately 50,000 unique credit card agreements, focusing specifically on annual aggregated data for the years 2024 and 2025.
+\label{sec:limitations}
+The scope of this research is defined by a targeted sample of approximately 500000 unique credit card agreements, focusing specifically on annual aggregated data for the years 2024 and 2025.
 
 A primary limitation of this study is the inherent nature of unsupervised learning; because the data lacks ground-truth customer labels, validation relies on internal mathematical heuristics rather than predictive accuracy. Additionally, by aggregating to an annual level, seasonality and short-term behavioral shifts may be smoothed over or obscured.
 
@@ -40,7 +41,11 @@ This chapter establishes the theoretical foundation for the methodologies applie
 
     \section{Customer Segmentation in Retail Banking}
     \label{sec:banking_segmentation}
-    In the financial services sector, credit card portfolios represent a complex ecosystem of customer behaviors, borrowing habits, and repayment patterns. Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the RFM (Recency, Frequency, Monetary) model to assess risk and profitability. While this manual, rule-based approach is effective for simple datasets, it struggles to scale and capture the nuances of high-dimensional data. Consequently, modern analytical approaches do not discard these foundational metrics; instead, they integrate core RFM variables with additional behavioral and demographic features to serve as inputs for unsupervised machine learning models. This evolution allows institutions to algorithmically discover latent, multivariate patterns rather than relying on rigid, human-defined heuristics \cite{yan_bank_2025}.
+    In the financial services sector, credit card portfolios represent a complex ecosystem of customer behaviors, borrowing habits, and repayment patterns. Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the RFM (Recency, Frequency, Monetary) model to assess risk and profitability. 
+    
+    In a retail banking context, this framework evaluates three core dimensions of account activity: \textit{Recency} measures the time elapsed since a customer's last transaction, indicating their current engagement level; \textit{Frequency} captures the total volume of transactions within a specific period, serving as a proxy for card reliance; and \textit{Monetary} quantifies the total transaction value or outstanding balance, directly tying customer behavior to institutional profitability \cite{wilbert_recency_2023}.
+    
+    While this manual, rule-based approach is effective for simple datasets, it struggles to scale and capture the nuances of high-dimensional data. Consequently, modern analytical approaches do not discard these foundational metrics; instead, they integrate core RFM variables with additional behavioral and demographic features to serve as inputs for unsupervised machine learning models. This evolution allows institutions to algorithmically discover latent, multivariate patterns rather than relying on rigid, human-defined heuristics \cite{yan_bank_2025}.
 
     \section{Unsupervised Machine Learning}
     \label{sec:unsupervised_ml}
@@ -80,7 +85,26 @@ This chapter establishes the theoretical foundation for the methodologies applie
         \end{enumerate}
         
         These two steps are repeated iteratively until convergence is achieved—specifically, when the cluster assignments no longer change ($S_i^{(t)} = S_i^{(t-1)}$), or when a predefined tolerance for the reduction in WCSS is met. By mathematically minimizing the variance within each grouping, the algorithm organically isolates distinct customer archetypes defined by their shared multivariate financial behaviors.
-
+        
+        \subsection{Mini-Batch K-means}
+        \label{subsec:minibatch_kmeans}
+        
+        The principles of stochastic descent provide the theoretical foundation for the Mini-Batch $K$-means algorithm (see Section \ref{sec:descent_optimization}). As established in Equation \ref{eq:kmeanscost}, the $K$-means cost function (WCSS) is inherently non-convex, meaning optimization relies on finding a stable local minimum.
+        
+        In standard $K$-means (Lloyd's algorithm), computing the distance between all $n$ points and $K$ centroids during the assignment step is analogous to a full batch evaluation, which scales poorly. Mini-Batch $K$-means mitigates this by applying stochastic optimization to the centroid updates \cite{sculley_web-scale_2010}.
+        
+        At iteration $t$, a random mini-batch $B$ of size $b$ is drawn from the dataset. Let $B_i \subset B$ represent the subset of points in the mini-batch assigned to the $i$-th centroid, $\mu_i$. Instead of replacing the centroid entirely, the algorithm performs an incremental update that shifts the centroid toward the mean of the new data points. This is fundamentally a stochastic gradient descent step on the WCSS cost function.
+        
+        Crucially, the algorithm maintains a per-center count, $v_{i, t}$, which tracks the cumulative number of data points assigned to centroid $\mu_i$ up to iteration $t$. The centroid is updated as follows:
+        
+        \begin{equation}
+            \mu_i^{(t+1)} = \mu_i^{(t)} + \frac{1}{v_{i, t}} \sum_{x \in B_i} \left( x - \mu_i^{(t)} \right)
+        \end{equation}
+        
+        This update mechanism elegantly reveals the underlying learning rate of the algorithm: $\alpha_t = \frac{1}{v_{i, t}}$. Because the cumulative point count $v_{i, t}$ increases linearly with the number of iterations, the learning rate decays proportionally to $1/t$. 
+        
+        This specific decay rate perfectly satisfies the Robbins-Monro convergence criteria (Equation \ref{eq:robbins_monro}), since the harmonic series diverges ($\sum \frac{1}{t} = \infty$) while the sum of its squares converges ($\sum \frac{1}{t^2} < \infty$). Therefore, Mini-Batch $K$-means is theoretically guaranteed to converge to a stable local optimum. By framing the centroid shifts as stochastic gradient updates with a naturally decaying learning rate, the algorithm achieves drastic reductions in computational complexity without sacrificing theoretical convergence guarantees.
+    
         \subsection{K-median}
         \label{subsec:kmedian}
         
@@ -138,6 +162,21 @@ This chapter establishes the theoretical foundation for the methodologies applie
         
         In the context of financial customer segmentation, applying PCA prior to $K$-means clustering effectively filters out stochastic noise and redundant, collinear variables (such as highly correlated transaction categories). This dimensionality reduction not only accelerates the iterative descent optimization discussed in Section \ref{sec:descent_optimization}, but also stabilizes the resulting cluster assignments by grounding the Euclidean distance calculations exclusively in the most statistically significant dimensions.
 
+        \subsection{Uniform Manifold Approximation and Projection (UMAP)}
+        \label{subsec:umap}
+        
+        While Principal Component Analysis (PCA) (see Section \ref{subsec:pca}) provides an efficient mechanism for capturing the global variance and linear relationships within a dataset, it inherently struggles to resolve complex, non-linear patterns. In high-dimensional financial datasets, data points frequently lie on complex, non-linear manifolds that linear projections simply flatten, causing distinct behavioral groups to overlap. To address this limitation, non-linear dimensionality reduction techniques are often employed. While algorithms such as t-Distributed Stochastic Neighbor Embedding (t-SNE) have historically been popular for these tasks, this research incorporates Uniform Manifold Approximation and Projection (UMAP) \cite{mcinnes_umap_2020} as an auxiliary, exploratory tool due to its superior computational scalability and robust theoretical foundation. Consequently, t-SNE will not be covered in detail in this study.
+        
+        UMAP is a modern manifold learning technique grounded in Riemannian geometry and algebraic topology. Unlike PCA, which mathematically projects data onto orthogonal axes that maximize variance, UMAP operates by constructing a high-dimensional fuzzy topological representation (a weighted graph) of the data and subsequently optimizing a low-dimensional graph to be as structurally similar as possible. This optimization is achieved by minimizing the fuzzy set cross-entropy $C$ between the high-dimensional graph weights $v_{i,j}$ (representing the likelihood that two points are connected in the original space) and the low-dimensional graph weights $w_{i,j}$ (representing their connectivity in the embedded space):
+        
+        \begin{equation}
+            C = \sum_{i \neq j} \left( v_{i,j} \log\left(\frac{v_{i,j}}{w_{i,j}}\right) + (1 - v_{i,j}) \log\left(\frac{1 - v_{i,j}}{1 - w_{i,j}}\right) \right)
+        \end{equation}
+        
+        By minimizing this cost function, UMAP demonstrates an exceptional ability to balance the preservation of both local and global topological structures of the entire dataset \cite{mcinnes_umap_2020}. This characteristic makes it highly effective for visualizing distinct clusters in complex data, such as financial transaction analysis, where maintaining the local proximity of similar customer profiles is crucial.
+        
+        While PCA is deterministic and largely parameter-free once the number of principal components is selected, UMAP relies on specific hyperparameters to shape the resulting embedding. The \texttt{n\_neighbors} parameter determines the size of the local neighborhood the algorithm considers when learning the manifold structure. Lower values force the algorithm to focus on capturing very fine, local features, whereas higher values encourage a broader view of the global relationships. Additionally, the \texttt{min\_dist} parameter controls the minimum distance between points in the low-dimensional space, effectively dictating how tightly UMAP is allowed to pack points together. Lower values result in densely clumped clusters, which can be useful for isolating strict groupings, while higher values provide a more evenly distributed representation of the dataset's topology \cite{noauthor_basic_nodate}.
+
     \section{Iterative Descent Optimization}
     \label{sec:descent_optimization}
     
@@ -171,47 +210,143 @@ This chapter establishes the theoretical foundation for the methodologies applie
     
         The first condition ensures that the algorithm can travel infinitely far to reach the minimum, regardless of the initial starting point. The second condition ensures that the variance of the updates decays over time, allowing the algorithm to settle into the local minimum rather than perpetually bouncing around it. Under these conditions, stochastic mini-batch descent converges almost surely to a local stationary point, even for non-convex objective functions \cite{robbins_stochastic_1951}.
     
-    \section{Mini-Batch K-means}
-    \label{sec:minibatch_kmeans}
+    \section{Data Scaling and Normalization}
+    \label{sec:data_scaling}
     
-    The principles of stochastic descent provide the theoretical foundation for the Mini-Batch $K$-means algorithm. As established in Equation \ref{eq:kmeanscost}, the $K$-means cost function (WCSS) is inherently non-convex, meaning optimization relies on finding a stable local minimum.
+    Distance-based clustering algorithms, such as $K$-means and $K$-median (Sections \ref{subsec:kmeans} and \ref{subsec:kmedian}), as well as variance-maximizing techniques like PCA (Section \ref{subsec:pca}), are mathematically sensitive to the scale of the input features. In credit card portfolios, financial variables inherently span vastly different magnitudes. For example, a customer's monthly transaction count may range from 0 to 50, while their total monetary spend could range from \$0 to \$50,000. If these raw values are processed directly, algorithms relying on Euclidean or Manhattan distances will disproportionately weight the features with larger numerical ranges, completely overshadowing the variance in smaller-scale features.
     
-    In standard $K$-means (Lloyd's algorithm), computing the distance between all $n$ points and $K$ centroids during the assignment step is analogous to a full batch evaluation, which scales poorly. Mini-Batch $K$-means mitigates this by applying stochastic optimization to the centroid updates \cite{sculley_web-scale_2010}.
+    To ensure that all variables contribute equally to the multidimensional topology of the dataset, data scaling is a mandatory preprocessing step. Depending on the statistical distribution of the features and the presence of outliers, different scaling methodologies can be applied:
     
-    At iteration $t$, a random mini-batch $B$ of size $b$ is drawn from the dataset. Let $B_i \subset B$ represent the subset of points in the mini-batch assigned to the $i$-th centroid, $\mu_i$. Instead of replacing the centroid entirely, the algorithm performs an incremental update that shifts the centroid toward the mean of the new data points. This is fundamentally a stochastic gradient descent step on the WCSS cost function.
+        \subsection{Z-Score Standardization}
+        \label{subsec:zscore_scaling}
+        A standard approach in financial analytics is Z-score standardization, which rescales each feature column to have a mean of zero ($\mu = 0$) and a standard deviation of one ($\sigma = 1$) \cite{pinheiro_impact_2025}. Mathematically, for a given feature $x$, the standardized value $z$ is computed as:
+        \begin{equation}
+            z = \frac{x - \mu}{\sigma}
+        \end{equation}
+        While effective for roughly normally distributed data, Z-score standardization can still be skewed by extreme outliers, as both the empirical mean and standard deviation are sensitive to extreme values.
     
-    Crucially, the algorithm maintains a per-center count, $v_{i, t}$, which tracks the cumulative number of data points assigned to centroid $\mu_i$ up to iteration $t$. The centroid is updated as follows:
+        \subsection{Min-Max Scaling}
+        \label{subsec:minmax_scaling}
+        When the objective is to bound the data within a strict, predefined range—typically $[0, 1]$—Min-Max scaling is utilized. This transformation preserves the exact geometric shape of the original distribution but forces all features onto the same finite scale \cite{pinheiro_impact_2025}. It is mathematically defined as:
+        \begin{equation}
+            x_{norm} = \frac{x - x_{min}}{x_{max} - x_{min}}
+        \end{equation}
+        Because this method relies strictly on the global maximum and minimum values, it is highly vulnerable to anomalies. In a credit card portfolio, a single massive transaction outlier can compress the vast majority of the customer data into an infinitesimally small range, destroying the variance needed for effective clustering.
     
-    \begin{equation}
-        \mu_i^{(t+1)} = \mu_i^{(t)} + \frac{1}{v_{i, t}} \sum_{x \in B_i} \left( x - \mu_i^{(t)} \right)
-    \end{equation}
+        \subsection{Robust Scaling}
+        \label{subsec:robust_scaling}
+        Given that financial datasets are notoriously heavy-tailed and prone to extreme outliers, Robust Scaling often provides a more stable transformation \cite{pinheiro_impact_2025}. Instead of utilizing the mean and standard deviation, this method centers the data using the median ($Q_2$) and scales it according to the Interquartile Range (IQR, defined as the 75th percentile $Q_3$ minus the 25th percentile $Q_1$):
+        \begin{equation}
+            x_{robust} = \frac{x - Q_2}{Q_3 - Q_1}
+        \end{equation}
+        By strictly utilizing non-parametric statistics and ignoring the extreme tails of the distribution, the robust scaler ensures that the bulk of the customer data remains well-spaced and proportionate. This prevents financial anomalies from distorting the geometry of the clustering space.
+        
+        Applying the appropriate transformation guarantees that the principal components extracted during PCA represent true underlying variance rather than arbitrary differences in measurement units. Furthermore, it allows the subsequent clustering algorithms to partition the data based on a holistic, balanced view of customer behavior.
+
+        
+    \section{Feature Engineering and Selection}
+    \label{sec:feature_engineering_selection}
     
-    This update mechanism elegantly reveals the underlying learning rate of the algorithm: $\alpha_t = \frac{1}{v_{i, t}}$. Because the cumulative point count $v_{i, t}$ increases linearly with the number of iterations, the learning rate decays proportionally to $1/t$. 
+    Preparing high-dimensional empirical datasets for unsupervised machine learning requires rigorous preprocessing. Observational data is frequently intrinsically noisy, highly skewed, and plagued by redundant or uninformative variables. If fed directly into distance-based clustering algorithms like $K$-means, these untreated features can severely distort the multidimensional space, leading to suboptimal or structurally meaningless partitioning. To construct a reliable mathematical baseline for segmentation, a systematic approach to feature engineering and selection must be applied.
     
-    This specific decay rate perfectly satisfies the Robbins-Monro convergence criteria (Equation \ref{eq:robbins_monro}), since the harmonic series diverges ($\sum \frac{1}{t} = \infty$) while the sum of its squares converges ($\sum \frac{1}{t^2} < \infty$). Therefore, Mini-Batch $K$-means is theoretically guaranteed to converge to a stable local optimum. By framing the centroid shifts as stochastic gradient updates with a naturally decaying learning rate, the algorithm achieves drastic reductions in computational complexity without sacrificing theoretical convergence guarantees.
+        \subsection{Logarithmic Transformation}
+        \label{subsec:log_transform}
+        
+        A common characteristic of many continuous empirical features is a severe right-skewness, often approximating a power-law or log-normal distribution. In such spaces, the vast majority of observations cluster at the lower end of the scale, while a small fraction of heavy-tailed outliers exhibit exceptionally large magnitudes. For distance-metric algorithms (e.g., Euclidean or Manhattan distance) and variance-maximizing techniques like PCA, these extreme right-tail outliers exert a disproportionate gravitational pull, skewing centroids and principal axes away from the general data distribution.
+        
+        To mitigate this, logarithmic transformations are frequently applied to highly skewed features to compress the long tail and approximate a more normal (Gaussian) distribution. Because empirical data often contains strict zero values (representing the absence of an attribute or event), a standard $\log(x)$ transformation is mathematically undefined. Instead, a shifted logarithmic transformation is utilized:
+        \begin{equation}
+            x' = \log(x + c)
+        \end{equation}
+        where $c$ is a small constant, typically $c=1$, ensuring that zero values are mapped strictly to zero ($\log(1) = 0$). By logarithmically scaling these variables, the relative geometric differences between typical observations become more pronounced, preventing extreme scalar anomalies from monopolizing the clustering algorithm's spatial definition.
+        
+        \subsection{Near-Zero Variance Filtering}
+        \label{subsec:nzv_filtering}
+        
+        High-dimensional datasets frequently contain highly specialized or niche variables, resulting in a significantly sparse feature matrix. Consequently, many dimensions may consist predominantly of a single constant value (most commonly zero). For instance, an observational attribute might remain completely inactive for 99.5\% of the sample population.
+        
+        Features that exhibit near-zero variance contribute negligible discriminatory power to the clustering process. Instead, they unnecessarily expand the dimensionality of the dataset, exacerbating the curse of dimensionality and increasing computational overhead without yielding topological benefits. To address this, near-zero variance filtering is employed as a primary feature selection step. This mathematical technique evaluates each feature based on the frequency ratio of the most common value to the second most common value, alongside the percentage of unique values relative to the total sample size. Features that fail to meet a predefined minimum variance threshold are algorithmically pruned from the dataset, ensuring that the model only projects observations onto vectors that meaningfully differentiate the underlying data.
+    
+        \subsection{Correlation Thresholding}
+        \label{subsec:correlation_thresholding}
+        
+        Beyond sparsity, high-dimensional datasets frequently exhibit severe multicollinearity, where multiple feature vectors encode largely overlapping information. If highly correlated features are left unchecked, unsupervised algorithms will implicitly "double-count" the underlying latent trait they represent. In a Euclidean space, two perfectly correlated features will mathematically exert twice the weight on the distance calculation as a single, independent feature, inadvertently biasing the resulting cluster topology.
+        
+        To neutralize this structural bias, correlation thresholding is applied to prune redundant variables. A pairwise correlation matrix is computed for all features, typically utilizing the Pearson correlation coefficient $\rho$ for linear relationships, or the Spearman rank correlation for monotonic, non-linear relationships. The Pearson correlation between two feature vectors $X$ and $Y$ is defined as:
+        \begin{equation}
+            \rho_{X,Y} = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \sum (y_i - \bar{y})^2}}
+        \end{equation}
+        
+        An absolute correlation threshold is established—often bounded between 0.80 and 0.90, depending on the acceptable rigidity of the feature space. When a pair of features exhibits a correlation magnitude $|\rho|$ exceeding this threshold, one of the collinear features is removed from the dataset. This algorithmic pruning ensures an orthogonal, balanced feature space where each dimension contributes mathematically distinct information to the final clustering model.
             
 \newEmptyPage\
+
 \chapter{Methodology}
-\label{chap:Methodology}
-\lipsum[1]
+\label{chap:methodology}
 
-    \section{Section}
-    \lipsum[1]
-    
-        \subsection{Subsection}
-        \lipsum[1]
-        
-        \subsection{Subsection}
-        \lipsum[2]
+This chapter outlines the data-driven pipeline developed to segment the credit card portfolio. It details the progression from raw database extraction and data cleaning to the iterative refinement of the feature space. To rigorously evaluate the optimal clustering parameters, the methodology is structured as a formal grid search. This experimental design isolates the impact of domain-driven feature engineering, heuristic pre-segmentation, and various normalization techniques on the final unsupervised customer archetypes.
 
-    \section{Section}
-    \lipsum[1]
-    
-        \subsection{Subsection}
-        \lipsum[1]
-        
-        \subsection{Subsection}
-        \lipsum[2]
+\section{Data Acquisition, Preprocessing, and Confidentiality}
+\label{sec:data_acquisition}
+
+The primary dataset utilized in this research was derived from the German credit card customer base of Avarda Bank, capturing records from January 1, 2024, through December 31, 2025. The raw data was synthesized from a complex architecture of multiple SQL databases, integrating transactional datasets, profitability metrics, and application records. 
+
+To accommodate the requirements of distance-based clustering algorithms such as K-means, the dataset was transformed into a flattened, cross-sectional matrix. By consolidating longitudinal records, each unique customer was represented by a single row. Following this aggregation, the operational dataset comprised approximately one million rows representing roughly 500,000 unique customers.
+
+Data integrity after the merging process was exceptionally high. Deliberate outlier removal and conventional data cleaning were bypassed at this stage to preserve a raw, authentic representation of the customer base, ensuring that the inherent financial anomalies of the portfolio remained intact for the unsupervised model to process.
+
+\subsection{Data Obfuscation and NDA Compliance}
+Due to a Non-Disclosure Agreement (NDA) with Avarda Bank, the exact underlying financial figures and specific internal feature names cannot be published. To comply with these confidentiality constraints while maintaining the academic integrity and reproducibility of the clustering results, a deterministic obfuscation protocol was applied. All presented monetary values and continuous variables have been linearly scaled to a range between 0 and 100. Furthermore, sensitive operational feature names have been generalized or anonymized.
+
+\section{Feature Engineering and Experimental Design}
+\label{sec:experimental_design}
+
+To rigorously evaluate the impact of feature selection and data preprocessing on the resulting customer archetypes, the clustering pipeline was structured around three distinct experimental cases: the Naive Baseline, the Normal Case, and the Improved Case. 
+
+\subsection{Case 1: The Naive Baseline (Data-Agnostic)}
+The Naive case was designed to simulate a purely algorithmic approach, relying on automated dimensionality reduction rather than financial domain knowledge. An initial, over-redundant feature space of 408 continuous variables was generated using exhaustive temporal aggregations (e.g., minimum, maximum, mean, median, count, and sum) across all available base metrics. 
+
+To manage this initial dimensionality, automated data-agnostic filtration was applied. A Near-Zero Variance (NZV) filter successfully identified and removed 258 largely static features. Subsequently, a correlation filter with a strict threshold of 0.90 was applied to mitigate multicollinearity, dropping an additional 55 variables. These algorithmic filtration parameters were held constant across all subsequent modeling phases to ensure comparability. This automated reduction left the Naive model with a final, uncurated space of 95 features. Crucially, in this baseline case, the massive sub-population of inactive accounts was retained in the dataset.
+
+\subsection{Case 2: The Normal Case (Domain-Driven Selection)}
+Recognizing the computational bloat and potential noise of the purely data-agnostic approach, the methodology was pivoted toward targeted, business-logic-driven feature selection. For the Normal case, the feature space was drastically scaled down by isolating five core financial behaviors (e.g., utilization rates, credit limits, and specific transaction categories). 
+
+By applying standard aggregations exclusively to these core metrics, the initial dataset was reduced to approximately 29 features. A secondary application of the standard NZV and correlation filtering further refined this space down to roughly 15 distinct, highly interpretable variables. Like the Naive baseline, the Normal case retained all inactive customer accounts to observe the algorithm's natural handling of zero-heavy distributions.
+
+\subsection{Case 3: The Improved Case (Optimized Pre-segmentation)}
+A significant structural quirk within the raw financial data was the substantial presence of inactive accounts. In a high-dimensional space, a dense cluster of zero-values acts as a mathematical sink, causing clustering algorithms to become trapped in suboptimal local minima.
+
+The Improved case represents the fully optimized pipeline. It utilizes the same tightly curated, domain-driven feature space of 15 variables as the Normal case. However, it introduces a heuristic pre-segmentation step to deterministically filter out inactive accounts \textit{before} applying the unsupervised models. Relying strictly on utilization rates was insufficient, as dormant accounts accumulating passive interest appeared mathematically active. Therefore, inactive accounts were deterministically defined and isolated as profiles exhibiting exactly zero merchant transactions. By filtering out accounts that lacked active, user-initiated transactions, the truly dormant profiles were successfully partitioned, ensuring the subsequent algorithms could focus entirely on the variance within active financial behaviors.
+
+\section{Scaling, Transformations, and Dimensionality Reduction}
+\label{sec:preprocessing_grid}
+
+Because financial metrics span drastically different magnitudes—ranging from single-digit transaction counts to monetary volumes in the tens of thousands—feature scaling was a mandatory precursor to distance-based clustering. Furthermore, financial variables are notoriously heavily right-skewed. 
+
+To determine the mathematically optimal representation of this data, a grid search of preprocessing pipelines was executed across all three experimental cases. Each case was evaluated using 12 distinct preprocessing permutations:
+\begin{itemize}
+    \item \textbf{Scaling Techniques:} Standard Scaler, Min-Max Scaler, and Robust Scaler.
+    \item \textbf{Transformations:} Logarithmic transformation ($\log(1+x)$) applied versus no transformation applied.
+    \item \textbf{Dimensionality Reduction:} Principal Component Analysis (PCA) applied versus no PCA applied.
+\end{itemize}
+
+\section{Clustering Setup and Algorithmic Validation}
+\label{sec:clustering_setup} 
+
+To efficiently evaluate the 36 preprocessing permutations, the standard K-means algorithm was selected as the baseline model. To accelerate convergence and strictly avoid poor local minima across the expansive customer matrix, the K-means++ initialization protocol was enforced across all runs.
+
+To ensure the resulting segmentation remained actionable for Avarda Bank, a hard upper boundary of $K=20$ clusters was established. Within each pipeline, the mathematically optimal number of clusters was determined by evaluating internal validation metrics—specifically, Silhouette Scores in conjunction with the Inertia measured via Elbow plots.
+
+\subsection{Algorithmic Robustness Check}
+While standard K-means served as the primary engine for the preprocessing grid search, evaluating the structural stability of the chosen model required testing alternative algorithmic assumptions. Therefore, once the mathematically optimal preprocessing pipeline and feature space were identified, a secondary algorithmic robustness check was conducted on this finalized dataset. 
+
+Specifically, the finalized data was subjected to two additional algorithms:
+\begin{itemize}
+    \item \textbf{K-Medians Clustering:} To test the model's resilience to residual financial outliers, K-medians (which minimizes Manhattan distance rather than Euclidean distance) was applied. Comparing the resulting median-based centroids to the mean-based centroids evaluates whether the preprocessing techniques sufficiently mitigated heavy-tailed skewness.
+    \item \textbf{Mini-Batch K-Means:} To evaluate computational scalability for future institutional deployment, Mini-Batch K-means was applied. This allowed for a direct quantitative comparison to determine if the batch-processing approximation resulted in a negligible degradation of cluster quality (Silhouette Score) relative to the significant reduction in computation time.
+\end{itemize}
+
+Given the extensive nature of this methodology, the subsequent Results chapter is structured sequentially. It first evaluates the macroscopic impact of the 36 preprocessing permutations to identify the optimal data representation. Following this, it presents the algorithmic robustness checks, and concludes with a detailed behavioral analysis of the single, highest-performing customer segmentation model.
 
 \newEmptyPage\
 \chapter{Results}

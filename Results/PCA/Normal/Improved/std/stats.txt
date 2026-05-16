@@ -1,0 +1,72 @@
+master_df shape: (999130, 586)
+Index type: MultiIndex
+Index names: ['Agreement_ID', 'Year']
+
+Total features before filtering: 29
+Excluded control columns: ['Dont Cluster', 'Label']
+
+NZV filter enabled: True
+Variance threshold: 0.0001
+Numeric candidates checked: 29
+Near-zero variance columns removed: 0
+Shape before NZV: (999128, 32)
+Shape after NZV:  (999128, 32)
+
+Numeric feature count: 29
+Correlation threshold: 0.9
+Highly correlated columns removed: 10
+Shape before: (999128, 32)
+Shape after:  (999128, 22)
+
+Dropped column -> Kept column (correlation):
+
+Total rows: 999,128
+Eligible for clustering (Dont Cluster == False): 633,279
+Excluded from clustering (Dont Cluster == True): 365,849
+X shape (numeric only, eligible rows): (633279, 8)
+
+Selected K based on silhouette score: 2 with silhouette score: 0.4499
+KMEANS_0: size=157685 Percentage of KMeans rows: 24.90%
+KMEANS_1: size=475594 Percentage of KMeans rows: 75.10%
+
+Label sizes:
+Label
+Group C      28271
+Group Z     337578
+KMEANS_0    157685
+KMEANS_1    475594
+Name: count, dtype: int64
+
+Full labeled distribution (KMeans + hardcoded):
+Label
+Group C     0.028296
+Group Z     0.337873
+KMEANS_0    0.157823
+KMEANS_1    0.476009
+Name: count, dtype: float64
+Time taken for K-Means clustering: 0.26 seconds
+
+Selected K based on silhouette score: 3 with silhouette score: 0.3502
+KMEDIAN_0: size=107911 Percentage of KMedians rows: 17.04%
+KMEDIAN_1: size=382569 Percentage of KMedians rows: 60.41%
+KMEDIAN_2: size=142799 Percentage of KMedians rows: 22.55%
+
+Label sizes:
+Label
+Group C       28271
+Group Z      337578
+KMEDIAN_0    107911
+KMEDIAN_1    382569
+KMEDIAN_2    142799
+Name: count, dtype: int64
+
+Full labeled distribution (KMedians + hardcoded):
+Label
+Group C      0.028296
+Group Z      0.337873
+KMEDIAN_0    0.108005
+KMEDIAN_1    0.382903
+KMEDIAN_2    0.142924
+Name: count, dtype: float64
+Time taken for K-Medians clustering: 6.65 seconds
+

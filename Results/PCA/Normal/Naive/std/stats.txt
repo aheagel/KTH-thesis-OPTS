@@ -1,0 +1,46 @@
+master_df shape: (999130, 586)
+Index type: MultiIndex
+Index names: ['Agreement_ID', 'Year']
+
+Total features before filtering: 408
+Excluded control columns: ['Dont Cluster', 'Label']
+
+NZV filter enabled: True
+Variance threshold: 0.0001
+Numeric candidates checked: 408
+Near-zero variance columns removed: 30
+Shape before NZV: (999128, 411)
+
+Near-zero variance columns dropped:
+Shape after NZV:  (999128, 381)
+
+Numeric feature count: 378
+Correlation threshold: 0.9
+Highly correlated columns removed: 158
+Shape before: (999128, 381)
+Shape after:  (999128, 223)
+
+Dropped column -> Kept column (correlation):
+
+Total rows: 999,128
+Eligible for clustering (Dont Cluster == False): 999,128
+Excluded from clustering (Dont Cluster == True): 0
+X shape (numeric only, eligible rows): (999128, 132)
+
+Selected K based on silhouette score: 2 with silhouette score: 0.5506
+KMEANS_0: size=874105 Percentage of KMeans rows: 87.49%
+KMEANS_1: size=125023 Percentage of KMeans rows: 12.51%
+
+Label sizes:
+Label
+KMEANS_0    874105
+KMEANS_1    125023
+Name: count, dtype: int64
+
+Full labeled distribution (KMeans + hardcoded):
+Label
+KMEANS_0    0.874868
+KMEANS_1    0.125132
+Name: count, dtype: float64
+Time taken for K-Means clustering: 2.20 seconds
+

@@ -1,0 +1,89 @@
+master_df shape: (999130, 586)
+Index type: MultiIndex
+Index names: ['Agreement_ID', 'Year']
+
+Total features before filtering: 408
+Excluded control columns: ['Dont Cluster', 'Label']
+
+NZV filter enabled: True
+Variance threshold: 0.0001
+Numeric candidates checked: 408
+Near-zero variance columns removed: 30
+Shape before NZV: (999128, 411)
+
+Near-zero variance columns dropped:
+Shape after NZV:  (999128, 381)
+
+Numeric feature count: 378
+Correlation threshold: 0.9
+Highly correlated columns removed: 158
+Shape before: (999128, 381)
+Shape after:  (999128, 223)
+
+Dropped column -> Kept column (correlation):
+
+Total rows: 999,128
+Eligible for clustering (Dont Cluster == False): 999,128
+Excluded from clustering (Dont Cluster == True): 0
+X shape (numeric only, eligible rows): (999128, 220)
+
+Selected K based on silhouette score: 2 with silhouette score: 0.5136
+KMEANS_0: size=633792 Percentage of KMeans rows: 63.43%
+KMEANS_1: size=365336 Percentage of KMeans rows: 36.57%
+
+Label sizes:
+Label
+KMEANS_0    633792
+KMEANS_1    365336
+Name: count, dtype: int64
+
+Full labeled distribution (KMeans + hardcoded):
+Label
+KMEANS_0    0.634345
+KMEANS_1    0.365655
+Name: count, dtype: float64
+Time taken for K-Means clustering: 9.64 seconds
+
+Selected K based on silhouette score: 4 with silhouette score: 0.5174
+MiniBatch_KMEANS_0: size=81216 Percentage of Mini-Batch K-Means rows: 8.13%
+MiniBatch_KMEANS_1: size=600003 Percentage of Mini-Batch K-Means rows: 60.05%
+MiniBatch_KMEANS_2: size=228641 Percentage of Mini-Batch K-Means rows: 22.88%
+MiniBatch_KMEANS_3: size=89268 Percentage of Mini-Batch K-Means rows: 8.93%
+
+Label sizes:
+Label
+MiniBatch_KMEANS_0     81216
+MiniBatch_KMEANS_1    600003
+MiniBatch_KMEANS_2    228641
+MiniBatch_KMEANS_3     89268
+Name: count, dtype: int64
+
+Full labeled distribution (Mini-Batch K-Means + hardcoded):
+Label
+MiniBatch_KMEANS_0    0.081287
+MiniBatch_KMEANS_1    0.600527
+MiniBatch_KMEANS_2    0.228841
+MiniBatch_KMEANS_3    0.089346
+Name: count, dtype: float64
+Time taken for Mini-Batch K-Means clustering: 4.54 seconds
+
+Selected K based on silhouette score: 3 with silhouette score: 0.5155
+KMEDIANS_0: size=625559 Percentage of KMedians rows: 62.61%
+KMEDIANS_1: size=213048 Percentage of KMedians rows: 21.32%
+KMEDIANS_2: size=160521 Percentage of KMedians rows: 16.07%
+
+Label sizes:
+Label
+KMEDIANS_0    625559
+KMEDIANS_1    213048
+KMEDIANS_2    160521
+Name: count, dtype: int64
+
+Full labeled distribution (KMedians + hardcoded):
+Label
+KMEDIANS_0    0.626105
+KMEDIANS_1    0.213234
+KMEDIANS_2    0.160661
+Name: count, dtype: float64
+Time taken for K-Medians clustering: 65.73 seconds
+
