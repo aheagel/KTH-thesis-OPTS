@@ -1,0 +1,105 @@
+master_df shape: (999130, 586)
+Index type: MultiIndex
+Index names: ['Agreement_ID', 'Year']
+
+Total features before filtering: 29
+Excluded control columns: ['Dont Cluster', 'Label']
+
+NZV filter enabled: True
+Variance threshold: 0.0001
+Numeric candidates checked: 29
+Near-zero variance columns removed: 0
+Shape before NZV: (999128, 32)
+Shape after NZV:  (999128, 32)
+
+Numeric feature count: 29
+Correlation threshold: 0.9
+Highly correlated columns removed: 10
+Shape before: (999128, 32)
+Shape after:  (999128, 22)
+
+Dropped column -> Kept column (correlation):
+
+Total rows: 999,128
+Eligible for clustering (Dont Cluster == False): 633,279
+Excluded from clustering (Dont Cluster == True): 365,849
+X shape (numeric only, eligible rows): (633279, 19)
+
+Selected K based on silhouette score: 4 with silhouette score: 0.4643
+KMEANS_0: size=135520 Percentage of KMeans rows: 21.40%
+KMEANS_1: size=262308 Percentage of KMeans rows: 41.42%
+KMEANS_2: size=95647 Percentage of KMeans rows: 15.10%
+KMEANS_3: size=139804 Percentage of KMeans rows: 22.08%
+
+Label sizes:
+Label
+Group C      28271
+Group Z     337578
+KMEANS_0    135520
+KMEANS_1    262308
+KMEANS_2     95647
+KMEANS_3    139804
+Name: count, dtype: int64
+
+Full labeled distribution (KMeans + hardcoded):
+Label
+Group C     0.028296
+Group Z     0.337873
+KMEANS_0    0.135638
+KMEANS_1    0.262537
+KMEANS_2    0.095730
+KMEANS_3    0.139926
+Name: count, dtype: float64
+Time taken for K-Means clustering: 0.44 seconds
+
+Selected K based on silhouette score: 5 with silhouette score: 0.4556
+MBKMEANS_0: size=121781 Percentage of Mini-Batch K-Means rows: 19.23%
+MBKMEANS_1: size=90228 Percentage of Mini-Batch K-Means rows: 14.25%
+MBKMEANS_2: size=93130 Percentage of Mini-Batch K-Means rows: 14.71%
+MBKMEANS_3: size=87511 Percentage of Mini-Batch K-Means rows: 13.82%
+MBKMEANS_4: size=240629 Percentage of Mini-Batch K-Means rows: 38.00%
+
+Label sizes:
+Label
+Group C        28271
+Group Z       337578
+MBKMEANS_0    121781
+MBKMEANS_1     90228
+MBKMEANS_2     93130
+MBKMEANS_3     87511
+MBKMEANS_4    240629
+Name: count, dtype: int64
+
+Full labeled distribution (Mini-Batch K-Means + hardcoded):
+Label
+Group C       0.028296
+Group Z       0.337873
+MBKMEANS_0    0.121887
+MBKMEANS_1    0.090307
+MBKMEANS_2    0.093211
+MBKMEANS_3    0.087587
+MBKMEANS_4    0.240839
+Name: count, dtype: float64
+Time taken for Mini-Batch K-Means clustering: 0.64 seconds
+
+Selected K based on silhouette score: 2 with silhouette score: 0.4782
+KMEDIAN_0: size=260083 Percentage of KMedians rows: 41.07%
+KMEDIAN_1: size=373196 Percentage of KMedians rows: 58.93%
+
+Label sizes:
+Label
+Group C       28271
+Group Z      337578
+KMEDIAN_0    260083
+KMEDIAN_1    373196
+Name: count, dtype: int64
+
+Full labeled distribution (KMedians + hardcoded):
+Label
+Group C      0.028296
+Group Z      0.337873
+KMEDIAN_0    0.260310
+KMEDIAN_1    0.373522
+Name: count, dtype: float64
+Time taken for K-Medians clustering: 3.80 seconds
+

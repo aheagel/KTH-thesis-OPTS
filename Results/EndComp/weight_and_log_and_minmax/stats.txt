@@ -1,0 +1,75 @@
+master_df shape: (999130, 586)
+Index type: MultiIndex
+Index names: ['Agreement_ID', 'Year']
+
+Total features before filtering: 29
+Excluded control columns: ['Dont Cluster', 'Label']
+
+NZV filter enabled: True
+Variance threshold: 0.0001
+Numeric candidates checked: 29
+Near-zero variance columns removed: 0
+Shape before NZV: (999128, 32)
+Shape after NZV:  (999128, 32)
+
+Numeric feature count: 29
+Correlation threshold: 0.9
+Highly correlated columns removed: 13
+Shape before: (999128, 32)
+Shape after:  (999128, 19)
+
+Dropped column -> Kept column (correlation):
+
+Total rows: 999,128
+Eligible for clustering (Dont Cluster == False): 633,279
+Excluded from clustering (Dont Cluster == True): 365,849
+X shape (numeric only, eligible rows): (633279, 16)
+
+Selected K based on silhouette score: 4 with silhouette score: 0.3870
+KMEANS_0: size=109844 Percentage of KMeans rows: 17.35%
+KMEANS_1: size=279833 Percentage of KMeans rows: 44.19%
+KMEANS_2: size=109364 Percentage of KMeans rows: 17.27%
+KMEANS_3: size=134238 Percentage of KMeans rows: 21.20%
+
+Label sizes:
+Label
+Group C      28271
+Group Z     337578
+KMEANS_0    109844
+KMEANS_1    279833
+KMEANS_2    109364
+KMEANS_3    134238
+Name: count, dtype: int64
+
+Full labeled distribution (KMeans + hardcoded):
+Label
+Group C     0.028296
+Group Z     0.337873
+KMEANS_0    0.109940
+KMEANS_1    0.280077
+KMEANS_2    0.109459
+KMEANS_3    0.134355
+Name: count, dtype: float64
+Time taken for K-Means clustering: 0.60 seconds
+
+Selected K based on silhouette score: 2 with silhouette score: 0.4509
+KMEDIAN_0: size=290228 Percentage of KMedians rows: 45.83%
+KMEDIAN_1: size=343051 Percentage of KMedians rows: 54.17%
+
+Label sizes:
+Label
+Group C       28271
+Group Z      337578
+KMEDIAN_0    290228
+KMEDIAN_1    343051
+Name: count, dtype: int64
+
+Full labeled distribution (KMedians + hardcoded):
+Label
+Group C      0.028296
+Group Z      0.337873
+KMEDIAN_0    0.290481
+KMEDIAN_1    0.343350
+Name: count, dtype: float64
+Time taken for K-Medians clustering: 1.91 seconds
+
