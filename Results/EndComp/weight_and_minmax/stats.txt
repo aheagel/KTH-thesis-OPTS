@@ -25,7 +25,7 @@ Eligible for clustering (Dont Cluster == False): 633,279
 Excluded from clustering (Dont Cluster == True): 365,849
 X shape (numeric only, eligible rows): (633279, 19)
 
-Selected K based on silhouette score: 4 with silhouette score: 0.4643
+Selected K based on silhouette score: 4 with silhouette score: 0.4641
 KMEANS_0: size=135520 Percentage of KMeans rows: 21.40%
 KMEANS_1: size=262308 Percentage of KMeans rows: 41.42%
 KMEANS_2: size=95647 Percentage of KMeans rows: 15.10%
@@ -50,9 +50,9 @@ KMEANS_1    0.262537
 KMEANS_2    0.095730
 KMEANS_3    0.139926
 Name: count, dtype: float64
-Time taken for K-Means clustering: 0.44 seconds
+Time taken for K-Means clustering: 0.51 seconds
 
-Selected K based on silhouette score: 5 with silhouette score: 0.4556
+Selected K based on silhouette score: 5 with silhouette score: 0.4575
 MBKMEANS_0: size=121781 Percentage of Mini-Batch K-Means rows: 19.23%
 MBKMEANS_1: size=90228 Percentage of Mini-Batch K-Means rows: 14.25%
 MBKMEANS_2: size=93130 Percentage of Mini-Batch K-Means rows: 14.71%
@@ -80,9 +80,9 @@ MBKMEANS_2    0.093211
 MBKMEANS_3    0.087587
 MBKMEANS_4    0.240839
 Name: count, dtype: float64
-Time taken for Mini-Batch K-Means clustering: 0.64 seconds
+Time taken for Mini-Batch K-Means clustering: 0.56 seconds
 
-Selected K based on silhouette score: 2 with silhouette score: 0.4782
+Selected K based on silhouette score: 2 with silhouette score: 0.4785
 KMEDIAN_0: size=260083 Percentage of KMedians rows: 41.07%
 KMEDIAN_1: size=373196 Percentage of KMedians rows: 58.93%
 
@@ -101,5 +101,5 @@ Group Z      0.337873
 KMEDIAN_0    0.260310
 KMEDIAN_1    0.373522
 Name: count, dtype: float64
-Time taken for K-Medians clustering: 3.80 seconds
+Time taken for K-Medians clustering: 3.44 seconds
 
