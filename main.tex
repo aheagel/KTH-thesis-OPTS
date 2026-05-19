@@ -8,14 +8,14 @@
     \section{Context and Motivation}
     The modern financial services industry relies heavily on data-driven decision-making to manage credit card portfolios, assess customer segments, target audiences, and optimize campaign profitability \cite{sargeant_algorithmic_2023}. However, much of this segmentation currently depends on manually defined rules and heuristics, which are typically formulated through an analyst's extensive, hands-on experience with the data.
     
-    However, this manual approach is inherently unscalable. As data volumes grow and the dimensionality of available features increases, human-driven analysis can only accommodate an ever-decreasing fraction of the true complexity within the customer base. To overcome these limitations, unsupervised machine learning offers a promising, data-driven alternative. 
+    However, this manual approach is inherently unscalable. As data volumes grow and the dimensionality of available features increases, human-driven analysis can only accommodate an ever-decreasing fraction of the true complexity within the customer base. To overcome these limitations, unsupervised machine learning offers a promising, data-driven alternative.
     
-    The objective of applying this methodology is not merely to search for hidden anomalies, but first and foremost to demonstrate that algorithmic approaches can reliably identify and group standard, expected behavioral patterns. By successfully capturing this foundational business logic as a baseline, the method can then be further leveraged to uncover complex, latent customer segments derived from highly nuanced account behavior. Ultimately, this research aims to show how hybrid techniques—combining deterministic heuristic filtering with scalable machine learning—can provide a comprehensive segmentation strategy free from rigid, predefined assumptions.
+    The objective of applying this methodology is not merely to search for hidden anomalies, but first and foremost to demonstrate that algorithmic approaches can reliably identify and group standard, expected behavioral patterns. By successfully capturing this foundational business logic as a baseline, the method can then be further leveraged to uncover complex, latent customer segments derived from highly nuanced account behavior. Ultimately, this research aims to show how hybrid techniques, combining deterministic heuristic filtering with scalable machine learning, can provide a comprehensive segmentation strategy free from rigid, predefined assumptions.
     
     \section{Problem Statement}
-    Despite the availability of comprehensive transactional and profitability data, translating these raw operational databases into cohesive customer segments presents a significant engineering and analytical challenge. Financial datasets are inherently complex: they are characterized by millions of records, high dimensionality, and multiple time horizons.
+    Despite the availability of comprehensive transactional and profitability data, translating these raw operational databases into cohesive customer segments presents a significant engineering and analytical challenge. Financial datasets are inherently complex. They are characterized by millions of records, high dimensionality, and multiple time horizons. Furthermore, transactional columns are frequently sparse and zero-heavy, which poses a unique hurdle for unsupervised learning algorithms to process effectively.
     
-    Furthermore, transactional columns are frequently sparse (zero-heavy), which poses a unique hurdle for unsupervised learning algorithms to process effectively. The core problem addressed in this thesis is the design and implementation of an end-to-end data processing and clustering pipeline capable of navigating this complexity. To generate meaningful insights, the raw data must be carefully aggregated, filtered, and engineered to ensure that highly correlated features do not skew the results. Ultimately, the challenge lies in building a scalable methodology that can distill raw financial data into distinct, economically interpretable customer segments.
+    The core problem addressed in this thesis is the design and implementation of an end-to-end data processing and clustering pipeline capable of navigating this complexity. To generate meaningful insights, the raw data must be carefully aggregated, filtered, and engineered to ensure that highly correlated features do not skew the results. Ultimately, the challenge lies in building a scalable methodology that can distill raw financial data into distinct, economically interpretable customer segments.
     
     \section{Research Objectives}
     To address this problem, this thesis is guided by the following primary research objectives:
@@ -30,11 +30,11 @@
     \label{sec:limitations}
     The scope of this research is defined by a targeted sample of approximately 500,000 unique credit card agreements, focusing specifically on annual aggregated data for the years 2024 and 2025.
     
-    A primary limitation of this study is the inherent nature of unsupervised learning; because the data lacks ground-truth customer labels, validation relies on internal mathematical heuristics rather than predictive accuracy. Additionally, by aggregating to an annual level, seasonality and short-term behavioral shifts may be smoothed over or obscured. Finally, to comply with strict contractual obligations safeguarding proprietary company information, all dataset attributes have been deliberately obfuscated. While this necessary anonymization ensures data privacy and security, it inherently restricts access to granular details and may constrain the depth of contextual interpretation.
+    A primary limitation of this study is the inherent nature of unsupervised learning. Because the data lacks ground-truth customer labels, validation relies on internal mathematical heuristics rather than predictive accuracy. Additionally, by aggregating to an annual level, seasonality and short-term behavioral shifts may be smoothed over or obscured. Finally, to comply with strict contractual obligations safeguarding proprietary company information, all dataset attributes have been deliberately obfuscated. While this necessary anonymization ensures data privacy and security, it inherently restricts access to granular details and may constrain the depth of contextual interpretation.
     
     \section{Thesis Structure}
     The remainder of this thesis is structured as follows. Chapter \ref{chap:Background} provides the theoretical background, detailing the financial metrics, evaluation parameters, and unsupervised machine learning algorithms utilized in this study. Chapter \ref{chap:Methodology} outlines the methodology, documenting the data engineering pipeline, feature selection process, and the experimental setup for the clustering model. Chapter \ref{chap:Results} presents the results, illustrating the optimal cluster formations and providing a detailed financial interpretation of each customer segment. Finally, Chapter 5 concludes the thesis by discussing the business implications of these findings and proposing avenues for future research.
-    
+
 \newEmptyPage\
 
 \chapter{Background}
@@ -43,32 +43,30 @@ This chapter establishes the theoretical foundation for the methodologies applie
 
     \section{Customer Segmentation in Retail Banking}
     \label{sec:banking_segmentation}
-    In the financial services sector, credit card portfolios represent a complex ecosystem of customer behaviors, borrowing habits, and repayment patterns. Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the RFM (Recency, Frequency, Monetary) model to assess risk and profitability.
+    In the financial services sector, credit card portfolios represent a complex ecosystem of customer behaviors, borrowing habits, and repayment patterns. Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the RFM model to assess risk and profitability. In a retail banking context, this framework evaluates three core dimensions of account activity. \textit{Recency} measures the time elapsed since a customer's last transaction, indicating their current engagement level. \textit{Frequency} captures the total volume of transactions within a specific period, serving as a proxy for card reliance. \textit{Monetary} quantifies the total transaction value or outstanding balance, directly tying customer behavior to institutional profitability \cite{wilbert_recency_2023}.
     
-    In a retail banking context, this framework evaluates three core dimensions of account activity: \textit{Recency} measures the time elapsed since a customer's last transaction, indicating their current engagement level; \textit{Frequency} captures the total volume of transactions within a specific period, serving as a proxy for card reliance; and \textit{Monetary} quantifies the total transaction value or outstanding balance, directly tying customer behavior to institutional profitability \cite{wilbert_recency_2023}.
-    
-    While this manual, rule-based approach is effective for simple datasets, it struggles to scale and capture the nuances of high-dimensional data. Consequently, modern analytical approaches do not discard these foundational metrics; instead, they integrate core RFM variables with additional behavioral and demographic features to serve as inputs for unsupervised machine learning models. Furthermore, simple heuristic frameworks remain highly effective for deterministic tasks—such as explicitly identifying and filtering out completely dormant or inactive accounts. By isolating these extremes, machine learning models can be focused entirely on algorithmically discovering latent, multivariate patterns within the active user base, rather than getting caught on simple binary boundaries \cite{yan_bank_2025}.
-    
+    While this manual, rule-based approach is effective for simple datasets, it struggles to scale and capture the nuances of high-dimensional data. Consequently, modern analytical approaches do not discard these foundational metrics; instead, they integrate core RFM variables with additional behavioral and demographic features to serve as inputs for unsupervised machine learning models. Furthermore, simple heuristic frameworks remain highly effective for deterministic tasks, such as explicitly identifying and filtering out completely dormant or inactive accounts. By isolating these extremes, machine learning models can be focused entirely on algorithmically discovering latent, multivariate patterns within the active user base, rather than getting caught on simple binary boundaries \cite{yan_bank_2025}.
+
     \section{Unsupervised Machine Learning}
     \label{sec:unsupervised_ml}
     Unlike supervised machine learning, which relies on a set of labeled training data to predict a known target variable, unsupervised machine learning focuses on discovering hidden structures and intrinsic patterns within unlabeled datasets. The primary objective of an unsupervised algorithm is not to map inputs to a predefined output, but rather to infer the natural topology, relationships, or distributions inherent in the data itself \cite{naeem_unsupervised_2023}.
     
-    In the context of financial customer segmentation, ground-truth labels defining distinct "customer archetypes" are rarely known in advance. While traditional approaches attempt to force customers into rigid, predefined demographic or financial buckets, unsupervised learning provides a purely data-driven methodology. By algorithmically evaluating the multivariate similarities across diverse account features, such as transaction categories, utilization rates, and repayment behaviors, unsupervised models can autonomously partition the active customer base into cohesive, economically meaningful segments without human bias.
-    
+    In the context of financial customer segmentation, ground-truth labels defining distinct customer archetypes are rarely known in advance. While traditional approaches attempt to force customers into rigid, predefined demographic or financial buckets, unsupervised learning provides a purely data-driven methodology. By algorithmically evaluating the multivariate similarities across diverse account features, such as transaction categories, utilization rates, and repayment behaviors, unsupervised models can autonomously partition the active customer base into cohesive, economically meaningful segments without human bias.
+
         \subsection{K-means}
         \label{subsec:kmeans}
-        In our study, our primary focus will be on the $K$-means clustering algorithm \cite{naeem_unsupervised_2023}. Its computational efficiency and robust theoretical foundation make it particularly well-suited for partitioning large-scale, multidimensional financial datasets.
+        In our study, our primary focus will be on the $K$-means clustering algorithm \cite{naeem_unsupervised_2023}. Its computational efficiency and robust theoretical foundation make it particularly well-suited for partitioning large-scale, multidimensional financial datasets. The $K$-means algorithm aims to partition a given dataset into $K$ distinct, non-overlapping clusters by minimizing the intra-cluster variance, commonly referred to as the Within-Cluster Sum of Squares, or WCSS.
         
-        The $K$-means algorithm aims to partition a given dataset into $K$ distinct, non-overlapping clusters by minimizing the intra-cluster variance, commonly referred to as the Within-Cluster Sum of Squares (WCSS) or Inertia. Let our financial dataset be represented as an $n \times d$ matrix, where we have $n$ observations $X = \{x_1, x_2, \dots, x_n\}$ and each observation $x_i \in \mathbb{R}^d$ is a $d$-dimensional vector of financial features. We seek to partition the dataset into a set of $K$ clusters $S = \{S_1, S_2, \dots, S_K\}$, where $K \le n$. The formal objective is to find the assignment of data points to clusters that minimizes the following cost function:
+        Let our financial dataset be represented as an $n \times d$ matrix, where we have $n$ observations $X = \{x_1, x_2, \dots, x_n\}$ and each observation $x_i \in \mathbb{R}^d$ is a $d$-dimensional vector of financial features. We seek to partition the dataset into a set of $K$ clusters $S = \{S_1, S_2, \dots, S_K\}$, where $K \le n$. The formal objective is to find the assignment of data points to clusters that minimizes the following cost function:
         
         \begin{equation}
         \label{eq:kmeanscost}
             J(S) = \sum_{i=1}^{K} \sum_{x \in S_i} \|x - \mu_i\|^2
         \end{equation}
         
-        where $\mu_i$ represents the geometric centroid (or mean) of the points assigned to cluster $S_i$, and $\|x - \mu_i\|^2$ denotes the squared Euclidean distance between a data point and its respective cluster centroid.
+        where $\mu_i$ represents the geometric centroid, or mean, of the points assigned to cluster $S_i$, and $\|x - \mu_i\|^2$ denotes the squared Euclidean distance between a data point and its respective cluster centroid. Because finding the exact global optimum for this problem is NP-hard, $K$-means typically employs an iterative refinement technique known as Lloyd's algorithm. The process begins by initializing $K$ centroids, $\mu_1^{(0)}, \mu_2^{(0)}, \dots, \mu_K^{(0)}$, often chosen randomly from the dataset or via methods such as $K$-means++ to improve convergence speed and avoid poor local minima \cite{arthur_k-means_2007}.
         
-        Because finding the exact global optimum for this problem is NP-hard, $K$-means typically employs an iterative refinement technique known as Lloyd's algorithm. The process begins by initializing $K$ centroids, $\mu_1^{(0)}, \mu_2^{(0)}, \dots, \mu_K^{(0)}$, often chosen randomly from the dataset or via methods such as $K$-means++ to improve convergence speed and avoid poor local minima \cite{arthur_k-means_2007}. The algorithm then alternates between two core operations:
+        The algorithm then alternates between two core operations:
         
         \begin{enumerate}
             \item \textbf{Assignment Step:} Each data point is assigned to the cluster whose centroid yields the least squared Euclidean distance. For the $t$-th iteration, the updated cluster $S_i^{(t)}$ is defined mathematically as:
@@ -82,130 +80,122 @@ This chapter establishes the theoretical foundation for the methodologies applie
             \end{equation}
         \end{enumerate}
         
-        These two steps are repeated iteratively until convergence is achieved—specifically, when the cluster assignments no longer change ($S_i^{(t)} = S_i^{(t-1)}$), or when a predefined tolerance for the reduction in WCSS is met. By mathematically minimizing the variance within each grouping, the algorithm organically isolates distinct customer archetypes defined by their shared multivariate financial behaviors.
-        
+        These two steps are repeated iteratively until convergence is achieved. Convergence occurs specifically when the cluster assignments no longer change, denoted by $S_i^{(t)} = S_i^{(t-1)}$, or when a predefined tolerance for the reduction in WCSS is met. By mathematically minimizing the variance within each grouping, the algorithm organically isolates distinct customer archetypes defined by their shared multivariate financial behaviors.
+
         \subsection{Mini-Batch K-means}
         \label{subsec:minibatch_kmeans}
-        The principles of stochastic descent provide the theoretical foundation for the Mini-Batch $K$-means algorithm (see Section \ref{sec:descent_optimization}). As established in Equation \ref{eq:kmeanscost}, the $K$-means cost function (WCSS) is inherently non-convex, meaning optimization relies on finding a stable local minimum.
+        The principles of stochastic descent provide the theoretical foundation for the Mini-Batch $K$-means algorithm, which is further detailed in Section \ref{sec:descent_optimization}. As established in Equation \ref{eq:kmeanscost}, the $K$-means cost function is inherently non-convex, meaning optimization relies on finding a stable local minimum. In standard $K$-means using Lloyd's algorithm, computing the distance between all $n$ points and $K$ centroids during the assignment step is analogous to a full batch evaluation, which scales poorly.
         
-        In standard $K$-means (Lloyd's algorithm), computing the distance between all $n$ points and $K$ centroids during the assignment step is analogous to a full batch evaluation, which scales poorly. Mini-Batch $K$-means mitigates this by applying stochastic optimization to the centroid updates \cite{sculley_web-scale_2010}. At iteration $t$, a random mini-batch $B$ of size $b$ is drawn from the dataset. Let $B_i \subset B$ represent the subset of points in the mini-batch assigned to the $i$-th centroid, $\mu_i$.
-        
-        Instead of replacing the centroid entirely, the algorithm performs an incremental update that shifts the centroid toward the mean of the new data points. This is fundamentally a stochastic gradient descent step on the WCSS cost function. Crucially, the algorithm maintains a per-center count, $v_{i, t}$, which tracks the cumulative number of data points assigned to centroid $\mu_i$ up to iteration $t$. The centroid is updated as follows:
+        Mini-Batch $K$-means mitigates this by applying stochastic optimization to the centroid updates \cite{sculley_web-scale_2010}. At iteration $t$, a random mini-batch $B$ of size $b$ is drawn from the dataset. Let $B_i \subset B$ represent the subset of points in the mini-batch assigned to the $i$-th centroid, $\mu_i$. Instead of replacing the centroid entirely, the algorithm performs an incremental update that shifts the centroid toward the mean of the new data points. This is fundamentally a stochastic gradient descent step on the WCSS cost function. Crucially, the algorithm maintains a per-center count, $v_{i,t}$, which tracks the cumulative number of data points assigned to centroid $\mu_i$ up to iteration $t$. The centroid is updated as follows:
         
         \begin{equation}
             \mu_i^{(t+1)} = \mu_i^{(t)} + \frac{1}{v_{i, t}} \sum_{x \in B_i} \left( x - \mu_i^{(t)} \right)
         \end{equation}
         
-        This update mechanism elegantly reveals the underlying learning rate of the algorithm: $\alpha_t = \frac{1}{v_{i, t}}$. Because the cumulative point count $v_{i, t}$ increases linearly with the number of iterations, the learning rate decays proportionally to $1/t$. This specific decay rate perfectly satisfies the Robbins-Monro convergence criteria, and thus Mini-Batch $K$-means is theoretically guaranteed to converge to a stable local optimum. By framing the centroid shifts as stochastic gradient updates with a naturally decaying learning rate, the algorithm achieves drastic reductions in computational complexity without sacrificing theoretical convergence guarantees.
-        
+        This update mechanism elegantly reveals the underlying learning rate of the algorithm, defined as $\alpha_t = \frac{1}{v_{i, t}}$. Because the cumulative point count $v_{i, t}$ increases linearly with the number of iterations, the learning rate decays proportionally to $1/t$. This specific decay rate perfectly satisfies the Robbins-Monro convergence criteria, and thus Mini-Batch $K$-means is theoretically guaranteed to converge to a stable local optimum. By framing the centroid shifts as stochastic gradient updates with a naturally decaying learning rate, the algorithm achieves drastic reductions in computational complexity without sacrificing theoretical convergence guarantees.
+
         \subsection{K-median}
         \label{subsec:kmedian}
-        While the $K$-means algorithm is computationally efficient, its reliance on squared Euclidean distances makes it inherently sensitive to outliers. In financial datasets, where extreme values are common, these outliers can disproportionately skew the cluster centroids.
+        While the $K$-means algorithm is computationally efficient, its reliance on squared Euclidean distances makes it inherently sensitive to outliers. In financial datasets, where extreme values are common, these outliers can disproportionately skew the cluster centroids. To address this vulnerability, the $K$-median clustering algorithm serves as a robust alternative.
         
-        To address this vulnerability, the $K$-median clustering algorithm serves as a robust alternative. Instead of minimizing the variance, $K$-median aims to partition the dataset by minimizing the absolute deviations between data points and their cluster centers. Using the same dataset matrix $X$ and cluster set $S$ defined previously, the formal objective of $K$-median is to find the assignment that minimizes the following cost function:
+        Instead of minimizing the variance, $K$-median aims to partition the dataset by minimizing the absolute deviations between data points and their cluster centers. Using the same dataset matrix $X$ and cluster set $S$ defined previously, the formal objective of $K$-median is to find the assignment that minimizes the following cost function:
         
         \begin{equation}
         \label{eq:kmediancost}
             J_{median}(S) = \sum_{i=1}^{K} \sum_{x \in S_i} \|x - m_i\|_1
         \end{equation}
         
-        where $m_i$ represents the median vector of the points assigned to cluster $S_i$, and $\|x - m_i\|_1$ denotes the $L_1$ norm, commonly known as the Manhattan distance, between a data point and its cluster median.
-        
-        Similar to $K$-means, the optimization of this cost function is achieved through an iterative heuristic framework. After initializing $K$ medians, the algorithm alternates between assigning points based on the smallest $L_1$ distance and updating the medians independently for each feature dimension. By substituting the mean with the median and the squared $L_2$ norm with the $L_1$ norm, the $K$-median algorithm effectively prevents extreme financial anomalies from dominating the spatial definition of the clusters, resulting in more representative and economically stable customer archetypes.
-    
+        where $m_i$ represents the median vector of the points assigned to cluster $S_i$, and $\|x - m_i\|_1$ denotes the $L_1$ norm, commonly known as the Manhattan distance, between a data point and its cluster median. Similar to $K$-means, the optimization of this cost function is achieved through an iterative heuristic framework. After initializing $K$ medians, the algorithm alternates between assigning points based on the smallest $L_1$ distance and updating the medians independently for each feature dimension. By substituting the mean with the median and the squared $L_2$ norm with the $L_1$ norm, the $K$-median algorithm effectively prevents extreme financial anomalies from dominating the spatial definition of the clusters, resulting in more representative and economically stable customer archetypes.
+
     \section{Cluster Evaluation Metrics}
     \label{sec:evaluation_metrics}
     Determining the optimal number of clusters, $K$, in unsupervised learning requires quantitative evaluation metrics, as ground-truth labels are unavailable. This study utilizes two primary metrics: Inertia and the Silhouette Score.
-    
-        \subsection{Inertia (Within-Cluster Sum of Squares)}
-        As defined in Equation \ref{eq:kmeanscost}, Inertia measures the total intra-cluster variance. While minimizing Inertia is the core objective of $K$-means, this value naturally decreases as $K$ increases, eventually reaching zero if every data point becomes its own individual cluster. Therefore, Inertia is typically evaluated using the "elbow method", where the optimal $K$ is identified at the inflection point where the rate of variance reduction sharply diminishes.
-        
+
+        \subsection{Inertia}
+        As defined in Equation \ref{eq:kmeanscost}, Inertia measures the total intra-cluster variance. While minimizing Inertia is the core objective of $K$-means, this value naturally decreases as $K$ increases, eventually reaching zero if every data point becomes its own individual cluster. Therefore, Inertia is typically evaluated using the elbow method, where the optimal $K$ is identified at the inflection point where the rate of variance reduction sharply diminishes.
+
         \subsection{Silhouette Score}
-        To evaluate both cluster cohesion (how tightly grouped the points in a cluster are) and cluster separation (how distinct the clusters are from one another), the Silhouette Score is employed. For a given data point $i$, the silhouette coefficient $s(i)$ is defined mathematically as:
+        To evaluate both cluster cohesion and cluster separation, the Silhouette Score is employed. Cluster cohesion describes how tightly grouped the points in a cluster are, while cluster separation describes how distinct the clusters are from one another. For a given data point $i$, the silhouette coefficient $s(i)$ is defined mathematically as:
         
         \begin{equation}
             s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
         \end{equation}
         
-        where $a(i)$ is the mean distance between point $i$ and all other points assigned to the same cluster, and $b(i)$ is the minimum mean distance between point $i$ and all points in any other cluster (i.e., the nearest neighboring cluster). 
+        where $a(i)$ is the mean distance between point $i$ and all other points assigned to the same cluster, and $b(i)$ is the minimum mean distance between point $i$ and all points in any other cluster, representing the nearest neighboring cluster.
         
-        The silhouette score ranges from $-1$ to $1$. A value close to $1$ indicates that the data point is perfectly matched to its own cluster and cleanly separated from neighboring clusters. A value near $0$ suggests the point is on or very close to the decision boundary between two clusters, and negative values indicate that the point may have been assigned to the wrong cluster. The global Silhouette Score of a model is calculated as the mean $s(i)$ across all data points, providing a straightforward and robust metric to mathematically determine the optimal partition count $K$.
-    
+        The silhouette score ranges from $-1$ to $1$. A value close to $1$ indicates that the data point is perfectly matched to its own cluster and cleanly separated from neighboring clusters. A value near $0$ suggests the point is on or very close to the decision boundary between two clusters. Negative values indicate that the point may have been assigned to the wrong cluster. The global Silhouette Score of a model is calculated as the mean $s(i)$ across all data points, providing a straightforward and robust metric to mathematically determine the optimal partition count $K$.
+
     \section{Dimensionality Reduction}
     \label{sec:dimensionality_reduction}
     
-        \subsection{Principal Component Analysis (PCA)}
+        \subsection{Principal Component Analysis}
         \label{subsec:pca}
-        While partitioning algorithms like $K$-means group observations into distinct clusters, financial datasets are frequently characterized by high dimensionality. As the number of features $d$ increases, the concept of distance becomes inherently less discriminative—a mathematical phenomenon widely known as the curse of dimensionality.
+        While partitioning algorithms like $K$-means group observations into distinct clusters, financial datasets are frequently characterized by high dimensionality. As the number of features $d$ increases, the concept of distance becomes inherently less discriminative, representing a mathematical phenomenon widely known as the curse of dimensionality. To mitigate this, Principal Component Analysis, or PCA, is often employed as a preliminary unsupervised learning step to reduce the feature space while preserving the maximum possible variance of the original dataset \cite{naeem_unsupervised_2023}.
         
-        To mitigate this, Principal Component Analysis (PCA) is often employed as a preliminary unsupervised learning step to reduce the feature space while preserving the maximum possible variance of the original dataset \cite{naeem_unsupervised_2023}. PCA seeks an orthogonal linear transformation that projects the data into a new $k$-dimensional subspace, where $k < d$, maximizing the variance of the projected data.
-        
-        The spatial relationships between the features are captured by the $d \times d$ sample covariance matrix. By solving the algebraic eigenvalue problem for the covariance matrix, we identify eigenvectors (dictating the direction of the principal axes) and eigenvalues (quantifying the magnitude of the dataset's variance explained along that specific axis). The first $k$ eigenvectors are concatenated to form a projection matrix, mapping the high-dimensional dataset into a reduced subspace.
+        PCA seeks an orthogonal linear transformation that projects the data into a new $k$-dimensional subspace, where $k < d$, maximizing the variance of the projected data. The spatial relationships between the features are captured by the $d \times d$ sample covariance matrix. By solving the algebraic eigenvalue problem for the covariance matrix, we identify eigenvectors, which dictate the direction of the principal axes, and eigenvalues, which quantify the magnitude of the dataset's variance explained along that specific axis. The first $k$ eigenvectors are concatenated to form a projection matrix, mapping the high-dimensional dataset into a reduced subspace.
         
         In the context of financial customer segmentation, applying PCA prior to clustering effectively filters out stochastic noise and redundant, collinear variables. This dimensionality reduction can accelerate optimization and stabilize cluster assignments by grounding distance calculations exclusively in the most statistically significant dimensions.
-        
-        \subsection{Uniform Manifold Approximation and Projection (UMAP)}
+
+        \subsection{Uniform Manifold Approximation and Projection}
         \label{subsec:umap}
-        While PCA provides an efficient mechanism for capturing the global variance and linear relationships within a dataset, it inherently struggles to resolve complex, non-linear patterns. In high-dimensional financial datasets, data points frequently lie on complex manifolds that linear projections simply flatten.
+        While PCA provides an efficient mechanism for capturing the global variance and linear relationships within a dataset, it inherently struggles to resolve complex, non-linear patterns. In high-dimensional financial datasets, data points frequently lie on complex manifolds that linear projections simply flatten. To address this limitation, non-linear dimensionality reduction techniques like Uniform Manifold Approximation and Projection, or UMAP, are often considered \cite{mcinnes_umap_2020}.
         
-        To address this limitation, non-linear dimensionality reduction techniques like Uniform Manifold Approximation and Projection (UMAP) \cite{mcinnes_umap_2020} are often considered. UMAP is a modern manifold learning technique grounded in Riemannian geometry and algebraic topology. Unlike PCA, UMAP operates by constructing a high-dimensional fuzzy topological representation of the data and subsequently optimizing a low-dimensional graph to be as structurally similar as possible. This optimization is achieved by minimizing the fuzzy set cross-entropy $C$ between the high-dimensional and low-dimensional graph weights.
-        
-        While theoretically robust for capturing non-linear topologies and maintaining local proximities of customer profiles, constructing the requisite high-dimensional fuzzy graphs is highly computationally intensive. For massive financial datasets containing millions of observations, UMAP often becomes computationally infeasible without aggressive down-sampling, limiting its utility as a primary reduction step in full-population pipelines.
-    
+        UMAP is a modern manifold learning technique grounded in Riemannian geometry and algebraic topology. Unlike PCA, UMAP operates by constructing a high-dimensional fuzzy topological representation of the data and subsequently optimizing a low-dimensional graph to be as structurally similar as possible. This optimization is achieved by minimizing the fuzzy set cross-entropy $C$ between the high-dimensional and low-dimensional graph weights. While theoretically robust for capturing non-linear topologies and maintaining local proximities of customer profiles, constructing the requisite high-dimensional fuzzy graphs is highly computationally intensive. For massive financial datasets containing millions of observations, UMAP often becomes computationally infeasible without aggressive down-sampling, limiting its utility as a primary reduction step in full-population pipelines.
+
     \section{Iterative Descent Optimization}
     \label{sec:descent_optimization}
     To understand the mechanics of large-scale clustering, it is necessary to first establish the general principles of iterative descent optimization. In applied machine learning, optimization problems frequently require minimizing a differentiable scalar cost function. When analytical solutions are computationally intractable, iterative methods such as Gradient Descent are employed to update parameters by taking steps in the direction of the negative gradient.
     
-    Evaluating the full gradient at every iteration is computationally prohibitive for massive datasets ($n \gg 1$). Stochastic gradient methods bypass this bottleneck by approximating the true gradient using a small, randomly sampled subset of the data known as a mini-batch. Because the mini-batch gradient is an unbiased estimator of the true gradient, the algorithm descends the cost surface in expectation. To theoretically guarantee convergence in the presence of stochastic noise, the learning rate must strictly satisfy the Robbins-Monro conditions for stochastic approximation \cite{robbins_stochastic_1951}.
-    
+    Evaluating the full gradient at every iteration is computationally prohibitive for massive datasets where $n \gg 1$. Stochastic gradient methods bypass this bottleneck by approximating the true gradient using a small, randomly sampled subset of the data known as a mini-batch. Because the mini-batch gradient is an unbiased estimator of the true gradient, the algorithm descends the cost surface in expectation. To theoretically guarantee convergence in the presence of stochastic noise, the learning rate must strictly satisfy the Robbins-Monro conditions for stochastic approximation \cite{robbins_stochastic_1951}.
+
     \section{Data Scaling and Normalization}
     \label{sec:data_scaling}
-    Distance-based clustering algorithms, such as $K$-means and $K$-median, as well as variance-maximizing techniques like PCA, are mathematically sensitive to the scale of the input features. In credit card portfolios, financial variables inherently span vastly different magnitudes (e.g., transaction counts from 0 to 50 versus monetary spend from \$0 to \$50,000). To ensure all variables contribute equally to the multidimensional topology, data scaling is a mandatory preprocessing step.
-    
+    Distance-based clustering algorithms, such as $K$-means and $K$-median, as well as variance-maximizing techniques like PCA, are mathematically sensitive to the scale of the input features. In credit card portfolios, financial variables inherently span vastly different magnitudes, for example, transaction counts ranging from 0 to 50 versus monetary spend spanning from \$0 to \$50,000. To ensure all variables contribute equally to the multidimensional topology, data scaling is a mandatory preprocessing step.
+
         \subsection{Z-Score Standardization}
         \label{subsec:zscore_scaling}
         A standard approach is Z-score standardization, which rescales each feature column to have a mean of zero and a standard deviation of one \cite{pinheiro_impact_2025}. While effective for roughly normally distributed data, it can still be skewed by extreme outliers.
-        
+
         \subsection{Min-Max Scaling}
         \label{subsec:minmax_scaling}
-        When the objective is to bound the data within a strict, predefined range—typically $[0, 1]$—Min-Max scaling is utilized. This transformation preserves the exact geometric shape of the original distribution but forces all features onto the same finite scale \cite{pinheiro_impact_2025}. Because it relies strictly on global maximum and minimum values, it is highly vulnerable to anomalies.
-        
+        When the objective is to bound the data within a strict, predefined range, typically $[0, 1]$, Min-Max scaling is utilized. This transformation preserves the exact geometric shape of the original distribution but forces all features onto the same finite scale \cite{pinheiro_impact_2025}. Because it relies strictly on global maximum and minimum values, it is highly vulnerable to anomalies.
+
         \subsection{Robust Scaling}
         \label{subsec:robust_scaling}
-        Given that financial datasets are notoriously heavy-tailed, Robust Scaling often provides a more stable transformation \cite{pinheiro_impact_2025}. Instead of utilizing the mean and standard deviation, this method centers the data using the median ($Q_2$) and scales it according to the Interquartile Range (IQR). By utilizing non-parametric statistics, the robust scaler ensures that the bulk of the customer data remains proportionate, preventing financial anomalies from distorting the geometry of the clustering space.
-    
+        Given that financial datasets are notoriously heavy-tailed, Robust Scaling often provides a more stable transformation \cite{pinheiro_impact_2025}. Instead of utilizing the mean and standard deviation, this method centers the data using the median, denoted as $Q_2$, and scales it according to the Interquartile Range, or IQR. By utilizing non-parametric statistics, the robust scaler ensures that the bulk of the customer data remains proportionate, preventing financial anomalies from distorting the geometry of the clustering space.
+
     \section{Feature Engineering and Selection}
     \label{sec:feature_engineering_selection}
     Preparing high-dimensional empirical datasets for unsupervised machine learning requires rigorous preprocessing. Observational data is frequently intrinsically noisy, highly skewed, and plagued by redundant variables.
-    
+
         \subsection{Logarithmic Transformation}
         \label{subsec:log_transform}
-        A common characteristic of many continuous empirical features is a severe right-skewness. For distance-metric algorithms, these extreme right-tail outliers exert a disproportionate gravitational pull. To mitigate this, shifted logarithmic transformations ($x' = \log(x + c)$) are frequently applied to compress the long tail and approximate a more normal distribution, mapping strict zero values strictly back to zero.
-        
+        A common characteristic of many continuous empirical features is a severe right-skewness. For distance-metric algorithms, these extreme right-tail outliers exert a disproportionate gravitational pull. To mitigate this, shifted logarithmic transformations, represented as $x' = \log(x + c)$, are frequently applied to compress the long tail and approximate a more normal distribution, mapping strict zero values exactly back to zero.
+
         \subsection{Near-Zero Variance Filtering}
         \label{subsec:nzv_filtering}
         High-dimensional datasets frequently contain highly specialized or niche variables, resulting in a significantly sparse feature matrix. Features that exhibit near-zero variance contribute negligible discriminatory power to the clustering process. To mathematically formalize this, let $x_j$ denote the $j$-th feature vector across $n$ observations. The sample variance for this feature is calculated as:
         $$s_j^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_{ij} - \bar{x}_j)^2$$
         where $x_{ij}$ represents the value of the $j$-th feature for the $i$-th observation, and $\bar{x}_j$ is the sample mean of feature $j$. To address uninformative features, near-zero variance filtering is employed as a primary feature selection step, algorithmically pruning features that fail to meet a predefined minimum variance threshold, $\tau_{nzv}$. Thus, any feature $j$ satisfying the condition $s_j^2 \le \tau_{nzv}$ is systematically removed from the feature space.
-        
+
         \subsection{Correlation Thresholding}
         \label{subsec:correlation_thresholding}
         Beyond sparsity, datasets frequently exhibit severe multicollinearity. In a Euclidean space, two perfectly correlated features will mathematically exert twice the weight on the distance calculation as a single, independent feature. To neutralize this structural bias, correlation thresholding is applied to prune redundant variables using the sample Pearson correlation coefficient, $\rho$. For any pair of features $x_j$ and $x_k$, the correlation is defined as:
         $$\rho_{j,k} = \frac{\sum_{i=1}^{n} (x_{ij} - \bar{x}_j)(x_{ik} - \bar{x}_k)}{\sqrt{\sum_{i=1}^{n} (x_{ij} - \bar{x}_j)^2} \sqrt{\sum_{i=1}^{n} (x_{ik} - \bar{x}_k)^2}}$$
-        An absolute correlation threshold, denoted as $\tau_{corr}$, is established—in this research, bounded at a strict magnitude of $\tau_{corr} = 0.90$. When a pair of features exhibits a linear relationship exceeding this limit ($|\rho_{j,k}| > \tau_{corr}$), one feature from the pair is algorithmically removed. This process ensures an orthogonal, balanced feature space that prevents heavily correlated variables from dominating the subsequent clustering objective function \cite{mangal_comparative_2018}.
-        
+        An absolute correlation threshold is established, which in this research is bounded at a strict magnitude of $\tau_{corr} = 0.90$. When a pair of features exhibits a linear relationship exceeding this limit, where $|\rho_{j,k}| > \tau_{corr}$, one feature from the pair is algorithmically removed. This process ensures an orthogonal, balanced feature space that prevents heavily correlated variables from dominating the subsequent clustering objective function \cite{mangal_comparative_2018}.
+
     \section{The Label Alignment Problem in Model Comparison}
     \label{sec:hungarian}
+    Evaluating and comparing multiple unsupervised learning algorithms presents a fundamental challenge. Each method independently assigns arbitrary identifiers to the clusters it discovers. For example, two completely different algorithms might successfully identify the exact same underlying grouping in the data, but one might label it "Cluster 0" while the other labels it "Cluster 3." To directly compare these clustering methods against each other, whether to measure their consensus or to evaluate them against a shared baseline, we must first solve the label alignment problem.
     
-    Evaluating and comparing multiple unsupervised learning algorithms presents a fundamental challenge: each method independently assigns arbitrary identifiers to the clusters it discovers. For example, two completely different algorithms might successfully identify the exact same underlying grouping in the data, but one might label it "Cluster 0" while the other labels it "Cluster 3." To directly compare these clustering methods against each other—whether to measure their consensus or to evaluate them against a shared baseline—we must first solve the label alignment problem. This requires discovering an optimal mapping function that translates their disparate, arbitrary labels into a unified space \cite{sieranoja_clustering_2024}. Without establishing this alignment, computing the true discrepancy between the algorithms' outputs is mathematically impossible.
-    
-    Formally, to compare the structural agreement between the methods, we directly quantify the absolute discrepancy between their aligned sets. We define the Minimum Label Differences as:
+    This requires discovering an optimal mapping function that translates their disparate, arbitrary labels into a unified space \cite{sieranoja_clustering_2024}. Without establishing this alignment, computing the true discrepancy between the algorithms' outputs is mathematically impossible. Formally, to compare the structural agreement between the methods, we directly quantify the absolute discrepancy between their aligned sets. We define the Minimum Label Differences as:
     \begin{equation}
         \text{Differences} = N - \sum_{i=1}^{N} \delta(g_i, \text{map}(a_i))
     \end{equation}
-    where $N$ is the total number of data points, $g_i$ is the reference label (from the baseline method or ground truth), $a_i$ is the predicted cluster label from the method being evaluated, $\delta$ is the Kronecker delta (which yields $1$ if the labels match and $0$ otherwise), and $\text{map}(\cdot)$ is the optimal mapping function \cite{sieranoja_clustering_2024}. Because a dataset with $k$ clusters possesses $k!$ possible mapping permutations, finding the optimal $\text{map}(\cdot)$ is computationally framed as a linear assignment problem. By constructing a contingency matrix that quantifies the overlap between the methods' cluster assignments, we utilize the Kuhn-Munkres (Hungarian) algorithm to deterministically isolate the 1-to-1 label pairing that minimizes the total label differences. This ensures that any remaining differences represent genuine structural disagreements between the clustering algorithms, rather than mere variations in their arbitrary naming conventions.
-
+    where $N$ is the total number of data points, $g_i$ is the reference label derived from the baseline method or ground truth, $a_i$ is the predicted cluster label from the method being evaluated, $\delta$ is the Kronecker delta which yields $1$ if the labels match and $0$ otherwise, and $\text{map}(\cdot)$ is the optimal mapping function \cite{sieranoja_clustering_2024}.
     
+    Because a dataset with $k$ clusters possesses $k!$ possible mapping permutations, finding the optimal $\text{map}(\cdot)$ is computationally framed as a linear assignment problem. By constructing a contingency matrix that quantifies the overlap between the methods' cluster assignments, we utilize the Kuhn-Munkres, or Hungarian, algorithm to deterministically isolate the 1-to-1 label pairing that minimizes the total label differences. This ensures that any remaining differences represent genuine structural disagreements between the clustering algorithms, rather than mere variations in their arbitrary naming conventions.
+
 \newEmptyPage\
 
 \chapter{Methodology}
@@ -216,100 +206,99 @@ This chapter outlines the data pipeline and machine learning workflow developed 
     \section{Data Acquisition and Structure}
     \label{sec:data_acquisition}
     The initial dataset consists of annual-level data containing approximately one million observations. Each observation represents a specific customer agreement at a given point in time, characterized by over 580 distinct features. To maintain a consistent unit of analysis, individual rows are tracked and treated as independent observations using a multi-index comprising \texttt{Agreement\_ID} and \texttt{Year}. This structure allows for the tracking of account behavior over multiple periods while treating each annual snapshot as a distinct data point in the feature space.
-    
+
     \section{Data Preprocessing and Heuristic Exclusions}
     \label{sec:preprocessing}
     Before applying any machine learning algorithms, the raw dataset required several preprocessing steps to ensure data quality and relevance to the target customer population.
-    
+
         \subsection{Data Cleansing}
-        The initial cleansing phase focused on standardizing the dataset and removing artifacts generated during the data export process. Analysis of the missing data revealed that rows containing null values (\texttt{NaN}) constituted less than 1\% of the total observations. Given this negligible proportion, listwise deletion was employed to drop these incomplete records. This approach was selected over imputation to prevent the introduction of synthetic bias, ensuring that all downstream distance calculations were based strictly on empirical observations. Furthermore, rows exhibiting fundamental structural errors—such as logically inconsistent temporal timestamps or corrupted feature mappings—were entirely removed from the analytical pipeline.
-        
-        \subsection{Rule-Based Segmentation (Pre-Clustering)}
+        The initial cleansing phase focused on standardizing the dataset and removing artifacts generated during the data export process. Analysis of the missing data revealed that rows containing null values, denoted as \texttt{NaN}, constituted less than 1\% of the total observations. Given this negligible proportion, listwise deletion was employed to drop these incomplete records. This approach was selected over imputation to prevent the introduction of synthetic bias, ensuring that all downstream distance calculations were based strictly on empirical observations. Furthermore, rows exhibiting fundamental structural errors, such as logically inconsistent temporal timestamps or corrupted feature mappings, were entirely removed from the analytical pipeline.
+
+        \subsection{Rule-Based Segmentation}
         An optional exploratory step built into the pipeline is a rule-based segmentation approach. The rationale is to explicitly isolate specific, predefined customer cohorts prior to the application of unsupervised models. Two primary groups of interest were established for this pre-segmentation phase: Group Z and Group C. These groups represent distinct behavioral or operational extremes within the portfolio based on specific internal business logic. By deterministically assigning these accounts to predefined segments beforehand, the primary clustering algorithms are freed from grouping obvious structural extremes, allowing them to focus entirely on parsing the nuanced variance within the active majority of the portfolio.
-    
+
     \section{Feature Engineering and Transformation}
     \label{sec:feature_engineering}
     To manage dimensionality and ensure the models train on high-signal data, a standardized sequence of feature transformations and algorithmic filtration is applied to the dataset.
-    
+
         \subsection{Logarithmic Transformation}
-        An experimental logarithmic transformation (\texttt{log1p}) is investigated as an optional preprocessing step to handle the extreme positive skewness typical of financial data. When enabled, this transformation is exclusively applied to aggregated transactional sum data, leaving other metric types (e.g., counts, limits, percentages) in their original scale. Crucially, because this logarithmic transformation fundamentally alters the variance and the linear relationships between variables, its application directly impacts all subsequent filtration steps. Consequently, toggling this transformation dynamically changes the final feature space across all tested models.
-        
+        An experimental logarithmic transformation, \texttt{log1p}, is investigated as an optional preprocessing step to handle the extreme positive skewness typical of financial data. When enabled, this transformation is exclusively applied to aggregated transactional sum data, leaving other metric types such as counts, limits, and percentages in their original scale. Crucially, because this logarithmic transformation fundamentally alters the variance and the linear relationships between variables, its application directly impacts all subsequent filtration steps. Consequently, toggling this transformation dynamically changes the final feature space across all tested models.
+
         \subsection{Algorithmic Filtration}
-        Following the transformation phase, automated data-agnostic filtration is applied to reduce computational bloat. First, a Near-Zero Variance (NZV) filter with a strict threshold of $10^{-4}$ is implemented to discard non-informative, largely static features. Subsequently, applying the correlation bounds discussed in Chapter \ref{chap:Background}, a filter is applied to mitigate multicollinearity, dropping variables with a Pearson correlation coefficient exceeding 0.90. This ensures the retention of only the most distinct, non-redundant behavioral proxies.
-    
+        Following the transformation phase, automated data-agnostic filtration is applied to reduce computational bloat. First, a Near-Zero Variance filter with a strict threshold of $10^{-4}$ is implemented to discard non-informative, largely static features. Subsequently, applying the correlation bounds discussed in Chapter \ref{chap:Background}, a filter is applied to mitigate multicollinearity, dropping variables with a Pearson correlation coefficient exceeding 0.90. This ensures the retention of only the most distinct, non-redundant behavioral proxies.
+
     \section{Scaling and Domain-Specific Weighting}
     \label{sec:scaling}
     Because distance-based clustering algorithms are highly sensitive to the magnitude of the input variables, rigorous scaling methodologies were required.
-    
+
         \subsection{Normalization Techniques}
         Before applying global scalers, manual pre-normalization is applied to naturally bounded features. For example, utilization rates are explicitly scaled by dividing by 100 to map them to a strict continuous range without distorting their original proportional meaning. Following this, three distinct global scaling techniques are evaluated across the pipeline: Min-Max Scaler, Robust Scaler, and Standard Scaler. Testing multiple scalers ensures that the final clusters are driven by genuine behavioral patterns rather than artifacts introduced by forced normal distributions or outlier sensitivities.
-        
+
         \subsection{Feature Weighting}
         \label{subsec:FeatureWeigting}
-        While explicit feature weighting was considered to balance the influence of distinct financial categories, it introduces significant complexity when implemented dynamically at scale. Consequently, targeted feature weighting is treated as an optional parameter, specifically utilized within the domain-driven experimental configurations (the Normal and Improved cases). In these cases, five core financial domains were identified as holding equal theoretical importance: incoming payments, interest capitalization, credit limits, utilization rates, and financial/cash-like transactions. 
+        While explicit feature weighting was considered to balance the influence of distinct financial categories, it introduces significant complexity when implemented dynamically at scale. Consequently, targeted feature weighting is treated as an optional parameter, specifically utilized within the domain-driven experimental configurations representing the Normal and Improved cases.
         
-        However, because the algorithmic filtration processes (such as the correlation and Near-Zero Variance filters) prune the number of aggregated sub-features unevenly across these categories, standard scaling would disproportionately favor domains that retained a higher volume of sub-features. To rectify this, a custom weighting function is applied immediately prior to dimensionality reduction (PCA). The total feature weight is distributed such that each of the five core domains contributes exactly 20\% of the aggregate weight. For a given domain $d$ with $n_d$ surviving features, each individual feature within that domain is multiplied by the factor $\frac{1}{5 \cdot n_d}$. This strict normalization ensures the unsupervised models evaluate each core financial behavior equally, regardless of its underlying dimensional footprint post-filtration.
-    
+        In these cases, five core financial domains were identified as holding equal theoretical importance: incoming payments, interest capitalization, credit limits, utilization rates, and financial or cash-like transactions. However, because the algorithmic filtration processes, such as the correlation and Near-Zero Variance filters, prune the number of aggregated sub-features unevenly across these categories, standard scaling would disproportionately favor domains that retained a higher volume of sub-features. To rectify this, a custom weighting function is applied immediately prior to dimensionality reduction. The total feature weight is distributed such that each of the five core domains contributes exactly 20\% of the aggregate weight. For a given domain $d$ with $n_d$ surviving features, each individual feature within that domain is multiplied by the factor $\frac{1}{5 \cdot n_d}$. This strict normalization ensures the unsupervised models evaluate each core financial behavior equally, regardless of its underlying dimensional footprint post-filtration.
+
     \section{Dimensionality Reduction}
     \label{sec:dimensionality_reduction}
     Given the scale of the dataset, dimensionality reduction techniques were evaluated to compress the feature space and improve algorithmic efficiency prior to spatial clustering.
-    
-        \subsection{Principal Component Analysis (PCA)}
-        Principal Component Analysis (PCA) is incorporated as an optional experimental variable. The methodology systematically investigates and compares clustering outcomes both with and without PCA to objectively assess its necessity. When enabled, PCA dynamically projects the features into a lower-dimensional space while retaining a target cumulative variance, attempting to mitigate the curse of dimensionality.
-        
+
+        \subsection{Principal Component Analysis}
+        Principal Component Analysis is incorporated as an optional experimental variable. The methodology systematically investigates and compares clustering outcomes both with and without PCA to objectively assess its necessity. When enabled, PCA dynamically projects the features into a lower-dimensional space while retaining a target cumulative variance, attempting to mitigate the curse of dimensionality.
+
         \subsection{Alternative Methods: Manifold Learning}
-        Alternative non-linear dimensionality reduction techniques were also considered, specifically Uniform Manifold Approximation and Projection (UMAP). However, preliminary testing revealed that applying UMAP to a dense dataset of approximately one million observations was computationally infeasible without aggressive down-sampling. To maintain the structural integrity of the full population analysis, UMAP is excluded from the primary quantitative methodology.
-    
+        Alternative non-linear dimensionality reduction techniques were also considered, specifically Uniform Manifold Approximation and Projection. However, preliminary testing revealed that applying UMAP to a dense dataset of approximately one million observations was computationally infeasible without aggressive down-sampling. To maintain the structural integrity of the full population analysis, UMAP is excluded from the primary quantitative methodology.
+
     \section{Clustering Algorithms}
     \label{sec:clustering_algorithms}
     The core of the machine learning workflow relies on distance-based, unsupervised partitioning algorithms to identify latent customer archetypes.
-    
+
         \subsection{Model Selection}
-        The primary algorithms evaluated are K-Means and K-Medians. Standard K-Means is tested for its efficiency in variance minimization and its widespread baseline acceptance. Conversely, K-Medians is evaluated to explicitly address the extreme outliers and heavy-tailed distributions inherent in financial transaction data; by minimizing the Manhattan distance ($L_1$ norm) rather than the squared Euclidean distance ($L_2$ norm), it offers a theoretically more robust partitioning of skewed variables. Additionally, the computational viability of Mini-Batch K-Means is briefly assessed as a highly scalable alternative.
-        
+        The primary algorithms evaluated are K-Means and K-Medians. Standard K-Means is tested for its efficiency in variance minimization and its widespread baseline acceptance. Conversely, K-Medians is evaluated to explicitly address the extreme outliers and heavy-tailed distributions inherent in financial transaction data. By minimizing the Manhattan distance, or $L_1$ norm, rather than the squared Euclidean distance, $L_2$ norm, it offers a theoretically more robust partitioning of skewed variables. Additionally, the computational viability of Mini-Batch K-Means is briefly assessed as a highly scalable alternative.
+
         \subsection{Hyperparameter Tuning}
-        Determining the optimal number of customer segments, or clusters ($K$), is critical. Across all testing phases, the value of $K$ is tuned by evaluating a range of cluster counts against two primary objective metrics: Inertia (the within-cluster sum of squares) to identify structural "elbow" points, and the Silhouette Score to quantify global cluster cohesion and separation. Most of the initial results focused mainly on the Silhouette Score as it provided a simple yet straightforward metric to determine an optimal $K$. In this particular case calclculating the silhouetta score over all data points is infeasible, thus a sample size of 50000 was arbitrary set.
-    
+        Determining the optimal number of customer segments, or clusters, denoted as $K$, is critical. Across all testing phases, the value of $K$ is tuned by evaluating a range of cluster counts against two primary objective metrics. Inertia, representing the within-cluster sum of squares, is used to identify structural elbow points, while the Silhouette Score is used to quantify global cluster cohesion and separation. Most of the initial results focused mainly on the Silhouette Score as it provided a simple yet straightforward metric to determine an optimal $K$. In this particular case, calculating the silhouette score over all data points is computationally infeasible, thus a sample size of 50,000 was arbitrarily selected.
+
     \section{Cluster Profiling and Interpretation}
     \label{sec:cluster_profiling}
     Following algorithmic partitioning, the resulting mathematical clusters must be translated back into actionable financial insights.
-    
+
         \subsection{Evaluation in Original Feature Space}
         Because distance algorithms require normalized data to function, the raw outputs lack immediate business context. To resolve this, all resulting cluster assignments are mapped directly back to the original, unscaled dataset. This ensures that the final customer archetypes are profiled using actual monetary transaction sums, genuine utilization percentages, and exact count metrics.
-        
+
         \subsection{Visualization and Temporal Dynamics}
-        To profile the segments, comparative statistical visualizations—such as customized boxplots and median-centric comparative analyses—are utilized to isolate defining financial characteristics. Finally, the methodology concludes by examining temporal dynamics to quantify customer segment transitions. This analysis is restricted to accounts possessing multiple annual observations (specifically, two observations, given the delimited 2024 to 2025 timeframe). By tracking the assigned cluster label for each unique \texttt{Agreement\_ID} across both periods, a temporal transition matrix is constructed using a cross-tabulation of the initial and subsequent cluster assignments. These raw transition counts are then row-normalized to yield empirical transition probabilities, detailing the exact percentage of accounts that either migrated to a new behavioral archetype or remained stable within their original cluster over the observed period.
-    
+        To profile the segments, comparative statistical visualizations, including customized boxplots and median-centric comparative analyses, are utilized to isolate defining financial characteristics. Finally, the methodology concludes by examining temporal dynamics to quantify customer segment transitions. This analysis is restricted to accounts possessing multiple annual observations, specifically two observations given the delimited 2024 to 2025 timeframe. By tracking the assigned cluster label for each unique \texttt{Agreement\_ID} across both periods, a temporal transition matrix is constructed using a cross-tabulation of the initial and subsequent cluster assignments. These raw transition counts are then row-normalized to yield empirical transition probabilities, detailing the exact percentage of accounts that either migrated to a new behavioral archetype or remained stable within their original cluster over the observed period.
+
     \section{Experimental Design: Pipeline Configurations}
     \label{sec:experimental_design}
     Having established the technical pipeline, the methodology was deployed across three distinct experimental cases to rigorously evaluate the impact of feature selection and data preprocessing on the resulting customer archetypes.
-    
-        \subsection{Case 1: The Naive Baseline (Data-Agnostic)}
-        The Naive case simulates a purely algorithmic approach, relying on automated dimensionality reduction rather than financial domain knowledge. An initial, highly redundant feature space of 408 continuous variables was generated using exhaustive temporal aggregations across all available base metrics. Applying the standardized algorithmic filtration (NZV and correlation limits), this automated reduction left the Naive model with an uncurated space of 220 features or if logged 157 features. As noted in Section~\ref{sec:feature_engineering}, this final feature count fluctuates depending on whether the optional logarithmic transformation is applied, as it alters which variables survive filtration. Crucially, in this baseline case, the massive sub-population of completely inactive accounts is retained, challenging the algorithms to handle the zero-heavy distributions natively.
-        
-        \subsection{Case 2: The Normal Case (Domain-Driven Selection)}
-        Recognizing the potential noise of a purely data-agnostic approach, the methodology was pivoted toward business-logic-driven feature selection. The feature space was drastically scaled down by isolating core financial behaviors, specifically utilization rates and specific incoming payment/transaction categories. Applying standard aggregations exclusively to these metrics reduced the initial dataset to 29 features. A secondary application of the NZV and correlation filters further refined this space down to roughly 19 distinct variables or 16 if logged. Like the Naive baseline, the Normal case implemented no heuristic pre-clustering.
-        
-        \subsection{Case 3: The Improved Case (Optimized Pre-segmentation)}
-        A significant structural challenge within the raw financial data is the substantial presence of inactive accounts, which act as a mathematical sink and cause clustering algorithms to become trapped in suboptimal local minima. The Improved case represents the fully optimized pipeline. It utilizes the same tightly curated, domain-driven feature space established in the Normal case. However, it activates the heuristic pre-segmentation step (detailed in Section~\ref{sec:preprocessing}) to deterministically filter out inactive accounts \textit{before} applying the unsupervised models. Inactive accounts were explicitly defined and isolated as profiles exhibiting exactly zero user-initiated transactions. By partitioning these accounts beforehand, the subsequent models are forced to focus entirely on the variance within active financial behaviors.
 
-\newEmptyPage\
+        \subsection{Case 1: The Naive Baseline}
+        The Naive case simulates a purely algorithmic approach, relying on automated dimensionality reduction rather than financial domain knowledge. An initial, highly redundant feature space of 408 continuous variables was generated using exhaustive temporal aggregations across all available base metrics. Applying the standardized algorithmic filtration, comprising NZV and correlation limits, left the Naive model with an uncurated space of 220 features, or 157 features if logarithmically transformed. As noted in Section~\ref{sec:feature_engineering}, this final feature count fluctuates depending on whether the optional logarithmic transformation is applied, as it alters which variables survive filtration. Crucially, in this baseline case, the massive sub-population of completely inactive accounts is retained, challenging the algorithms to handle the zero-heavy distributions natively.
+
+        \subsection{Case 2: The Normal Case}
+        Recognizing the potential noise of a purely data-agnostic approach, the methodology was pivoted toward business-logic-driven feature selection. The feature space was drastically scaled down by isolating core financial behaviors, specifically utilization rates and specific incoming payment or transaction categories. Applying standard aggregations exclusively to these metrics reduced the initial dataset to 29 features. A secondary application of the NZV and correlation filters further refined this space down to roughly 19 distinct variables, or 16 if logarithmically transformed. Like the Naive baseline, the Normal case implemented no heuristic pre-clustering.
+
+        \subsection{Case 3: The Improved Case}
+        A significant structural challenge within the raw financial data is the substantial presence of inactive accounts, which act as a mathematical sink and cause clustering algorithms to become trapped in suboptimal local minima. The Improved case represents the fully optimized pipeline. It utilizes the same tightly curated, domain-driven feature space established in the Normal case. However, it activates the heuristic pre-segmentation step, detailed in Section~\ref{sec:preprocessing}, to deterministically filter out inactive accounts before applying the unsupervised models. Inactive accounts were explicitly defined and isolated as profiles exhibiting exactly zero user-initiated transactions. By partitioning these accounts beforehand, the subsequent models are forced to focus entirely on the variance within active financial behaviors.
+
+
+\newEmptyPage
 
 \chapter{Results}
 \label{chap:Results}
 
-This chapter presents the empirical findings of the unsupervised machine learning pipeline. All results are derived from the initial dataset of 999,128 annual observations spanning 2024 and 2025, each indexed by a unique \texttt{Agreement\_ID} and \texttt{Year} pair. Every figure and table in this chapter explicitly identifies the corresponding pipeline configuration: the feature engineering approach (Naive or Normal/Domain-driven), the population subset (full 999,128 or active 633,279 observations), the applied scaler (Min-Max, Standard, or Robust), whether a logarithmic transformation was applied, and whether PCA was used.
+This chapter presents the empirical findings of the unsupervised machine learning pipeline. All results are derived from the initial dataset of 999,128 annual observations spanning 2024 and 2025, each indexed by a unique \texttt{Agreement\_ID} and \texttt{Year} pair. Every figure and table in this chapter explicitly identifies the corresponding pipeline configuration, including the feature engineering approach, the population subset, the applied scaler, whether a logarithmic transformation was applied, and whether PCA was used. 
 
 The results are structured as follows. Section~\ref{sec:results_minmax} evaluates the three scaling strategies on cluster geometry. Section~\ref{sec:results_grid_search} compares the Naive and Normal feature engineering pipelines. Section~\ref{sec:results_presegmentation} reports the structural effect of heuristic pre-segmentation. Section~\ref{sec:results_pca} evaluates PCA as an optional reduction step. Section~\ref{sec:results_weighting} isolates the effect of domain weighting. Section~\ref{sec:results_optimized_evaluation} compares clustering algorithms on the final pipeline. Finally, Sections~\ref{sec:results_profiling} and~\ref{sec:results_temporal} present the financial profiling of the resulting archetypes and their temporal transition structure.
 
 \section{Evaluating Scaling Methodologies}
 \label{sec:results_minmax}
 
-The three global scaling strategies—MinMaxScaler, StandardScaler, and RobustScaler—were evaluated on the full portfolio of 999,128 observations prior to any heuristic exclusions. Two feature matrices were tested in parallel: the curated \textbf{Normal pipeline} (16 features, logarithmically transformed, no PCA) and the uncurated \textbf{Naive pipeline} (157 features, logarithmically transformed, no PCA). Both K-Means and K-Medians were evaluated on the Normal pipeline; only K-Means was applied to the Naive pipeline for computational feasibility.
+The three global scaling strategies, MinMaxScaler, StandardScaler, and RobustScaler, were evaluated on the full portfolio of 999,128 observations prior to any heuristic exclusions. Two feature matrices were tested in parallel: the curated \textbf{Normal pipeline} using 16 features, logarithmically transformed, and no PCA, and the uncurated \textbf{Naive pipeline} using 157 features, logarithmically transformed, and no PCA. Both K-Means and K-Medians were evaluated on the Normal pipeline. Only K-Means was applied to the Naive pipeline for computational feasibility. Tables~\ref{tab:scaler_comparison_16_features} and~\ref{tab:scaler_comparison_157_features} report the full results for the Normal and Naive pipelines respectively. Across both feature matrices, MinMaxScaler and StandardScaler produced balanced cluster distributions, whereas RobustScaler produced a near-degenerate partition in both cases, with 99.84\% of observations assigned to a single cluster regardless of the algorithm or feature space applied.
 
-Tables~\ref{tab:scaler_comparison_16_features} and~\ref{tab:scaler_comparison_157_features} report the full results for the Normal and Naive pipelines respectively. Across both feature matrices, MinMaxScaler and StandardScaler produced balanced cluster distributions, whereas RobustScaler produced a near-degenerate partition in both cases, with 99.84\% of observations assigned to a single cluster regardless of the algorithm or feature space applied.
-
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \renewcommand{\arraystretch}{1.3} 
 \resizebox{\textwidth}{!}{%
@@ -338,7 +327,7 @@ RobustScaler
 \label{tab:scaler_comparison_16_features}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \renewcommand{\arraystretch}{1.3}
 \resizebox{\textwidth}{!}{%
@@ -358,9 +347,9 @@ RobustScaler   & K-Means & 2 & 0.9752 & 3.23 & C0: 997,501 (99.84\%) \newline C1
 \label{tab:scaler_comparison_157_features}
 \end{table}
 
-Figure~\ref{fig:minmax_vs_std_silscore} contrasts the K-Means Silhouette score trajectories across the full range of evaluated $K$ values for MinMaxScaler (left) and StandardScaler (right), both generated from the \textbf{Normal pipeline} (16 features, logarithmic, no PCA, full 999k). MinMaxScaler achieves a stable peak at $K=2$, while StandardScaler produces a lower and more erratic trajectory. Based on these results, MinMaxScaler was selected as the global scaler for all subsequent pipeline configurations.
+Figure~\ref{fig:minmax_vs_std_silscore} contrasts the K-Means Silhouette score trajectories across the full range of evaluated $K$ values for MinMaxScaler and StandardScaler, both generated from the \textbf{Normal pipeline}. MinMaxScaler achieves a stable peak at $K=2$, while StandardScaler produces a lower and more erratic trajectory. Based on these results, MinMaxScaler was selected as the global scaler for all subsequent pipeline configurations.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/std/kmeans_silhouette_score_by_k.png}
@@ -374,13 +363,13 @@ Figure~\ref{fig:minmax_vs_std_silscore} contrasts the K-Means Silhouette score t
 A grid search was conducted to evaluate the effect of feature dimensionality on K-Means clustering outcomes. Two pipelines were contrasted, both operating on the full 999,128 observations with MinMaxScaler, logarithmic transformation, and no PCA:
 
 \begin{itemize}
-    \item \textbf{Naive pipeline:} 157 features post-filtration (NZV threshold $10^{-4}$, Pearson correlation threshold 0.90, applied to an initial 408-variable space)
-    \item \textbf{Normal pipeline:} 16 features post-filtration, derived from domain-driven selection prior to algorithmic filtration
+    \item \textbf{Naive pipeline:} 157 features post-filtration, utilizing an NZV threshold of $10^{-4}$ and a Pearson correlation threshold of 0.90 applied to an initial 408-variable space.
+    \item \textbf{Normal pipeline:} 16 features post-filtration, derived from domain-driven selection prior to algorithmic filtration.
 \end{itemize}
 
-Figure~\ref{fig:grid_search_inertia} shows the K-Means Inertia trajectories for both pipelines across the evaluated range of $K$. The Naive pipeline (left, 157 features) produces Inertia values several orders of magnitude larger than the Normal pipeline (right, 16 features). The corresponding Silhouette score trajectories are shown in Figure~\ref{fig:grid_search_naive_vs_normal}, where the Naive pipeline (left) peaks at a substantially lower score than the Normal pipeline (right) and declines monotonically for larger $K$.
+Figure~\ref{fig:grid_search_inertia} shows the K-Means Inertia trajectories for both pipelines across the evaluated range of $K$. The Naive pipeline produces Inertia values several orders of magnitude larger than the Normal pipeline. The corresponding Silhouette score trajectories are shown in Figure~\ref{fig:grid_search_naive_vs_normal}, where the Naive pipeline peaks at a substantially lower score than the Normal pipeline and declines monotonically for larger $K$.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Naive/minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/minmax/kmeans_inertia_objective_by_k.png}
@@ -388,7 +377,7 @@ Figure~\ref{fig:grid_search_inertia} shows the K-Means Inertia trajectories for 
     \label{fig:grid_search_inertia}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Naive/minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/minmax/kmeans_silhouette_score_by_k.png}
@@ -399,11 +388,11 @@ Figure~\ref{fig:grid_search_inertia} shows the K-Means Inertia trajectories for 
 \section{Heuristic Pre-segmentation Outputs}
 \label{sec:results_presegmentation}
 
-The Improved pipeline introduced deterministic rule-based pre-segmentation applied to the full 999,128 observations prior to clustering. Two groups were isolated: Group Z, comprising accounts with exactly zero user-initiated transactions, and Group C, excluded on specific business logic criteria. The remaining observations were designated as the active portfolio and forwarded to the clustering algorithms. The full population counts for each group are reported in Table~\ref{tab:pipeline_summary}.
+The Improved pipeline introduced deterministic rule-based pre-segmentation applied to the full 999,128 observations prior to clustering. Two groups were isolated: Group Z, comprising accounts with exactly zero user-initiated transactions, and Group C, excluded on specific business logic criteria. The remaining observations were designated as the active portfolio and forwarded to the clustering algorithms. The full population counts for each group are reported in Table~\ref{tab:pipeline_summary}. 
 
-Table~\ref{tab:pipeline_summary} contrasts the input populations and K-Means outcomes between the \textbf{Normal pipeline} (full 999,128 observations, 19 features post-filtration, MinMaxScaler, non-logarithmic, no PCA) and the \textbf{Improved pipeline} (active 633,279 observations, same remaining configuration). Both pipelines converged on $K=2$, with full metric details reported in the table.
+Table~\ref{tab:pipeline_summary} contrasts the input populations and K-Means outcomes between the \textbf{Normal pipeline} using the full 999,128 observations, and the \textbf{Improved pipeline} using the active 633,279 observations. Both pipelines converged on $K=2$, with full metric details reported in the table.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lrr}
@@ -432,9 +421,9 @@ Table~\ref{tab:pipeline_summary} contrasts the input populations and K-Means out
     \label{tab:pipeline_summary}
 \end{table}
 
-Figure~\ref{fig:presegmentation_boxplots} shows the unscaled feature distributions across the resulting K-Means clusters for both pipelines. In the left panel (Normal pipeline, full 999k), the interquartile ranges across both clusters are compressed toward zero for the majority of plotted features. In the right panel (Improved pipeline, active 633k), following the exclusion of Group Z and Group C, the interquartile ranges expand substantially across both clusters.
+Figure~\ref{fig:presegmentation_boxplots} shows the unscaled feature distributions across the resulting K-Means clusters for both pipelines. In the left panel, representing the Normal pipeline with the full 999,128 observations, the interquartile ranges across both clusters are compressed toward zero for the majority of plotted features. In the right panel, detailing the Improved pipeline with 633,279 active observations, following the exclusion of Group Z and Group C, the interquartile ranges expand substantially across both clusters.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.55\textwidth]{Results/Normal/Normal/Normal/minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}%
         \hspace{0.02\textwidth}
@@ -447,9 +436,9 @@ Figure~\ref{fig:presegmentation_boxplots} shows the unscaled feature distributio
 \section{Evaluating Dimensionality Reduction via PCA}
 \label{sec:results_pca}
 
-PCA was evaluated as an optional reduction step applied to the \textbf{Weighted (EndComp) pipeline}: active 633,279 observations, 19 features post-filtration, domain-weighted, MinMaxScaler, non-logarithmic. When enabled, PCA compressed the 19-dimensional feature space to 3 principal components. Table~\ref{tab:pca_comparison} reports the K-Means outcomes for both configurations. Both models converged on $K=4$, with the PCA model yielding a marginally higher Silhouette score, a halved convergence time, and a cluster distribution differing from the non-PCA configuration by a maximum of 1.2\% across all clusters.
+PCA was evaluated as an optional reduction step applied to the \textbf{Weighted (EndComp) pipeline}, utilizing 633,279 active observations, 19 features post-filtration, domain-weighting, MinMaxScaler, and no logarithmic transformation. When enabled, PCA compressed the 19-dimensional feature space to 3 principal components. Table~\ref{tab:pca_comparison} reports the K-Means outcomes for both configurations. Both models converged on $K=4$, with the PCA model yielding a marginally higher Silhouette score, a halved convergence time, and a cluster distribution differing from the non-PCA configuration by a maximum of 1.2\% across all clusters.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -473,13 +462,13 @@ PCA was evaluated as an optional reduction step applied to the \textbf{Weighted 
     \bottomrule
     \end{tabular}%
     }
-    \caption{K-Means performance on the \textbf{Weighted (EndComp) pipeline}: standard 19-feature space (no PCA) versus PCA-reduced space (3 components). Both configurations: active 633,279 observations, domain-weighted, MinMaxScaler, non-logarithmic.}
+    \caption{K-Means performance on the \textbf{Weighted (EndComp) pipeline}: standard 19-feature space versus PCA-reduced space. Both configurations: active 633,279 observations, domain-weighted, MinMaxScaler, non-logarithmic.}
     \label{tab:pca_comparison}
 \end{table}
 
 The Silhouette score trajectories for both configurations are shown in Figure~\ref{fig:pca_silhouette_comparison}, with the 19-feature model on the left and the 3-component PCA model on the right.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_pca_and_minmax/kmeans_silhouette_score_by_k.png}
@@ -487,12 +476,12 @@ The Silhouette score trajectories for both configurations are shown in Figure~\r
     \label{fig:pca_silhouette_comparison}
 \end{figure}
 
-\subsection{PCA on the Uncurated Feature Space (Naive Case)}
+\subsection{PCA on the Uncurated Feature Space}
 \label{sec:results_pca_naive}
 
 For comparative context, PCA was also applied to the uncurated \textbf{Naive pipeline} operating on the full 999,128 observations with MinMaxScaler and no domain weighting. Table~\ref{tab:pca_naive_comparison} reports results across two transformation variants. In the non-logarithmic variant, PCA compressed 220 features to 9 principal components, altered the optimal partition from $K=2$ to $K=3$, and reduced convergence time from 9.64 seconds to 0.40 seconds. In the logarithmic variant, PCA compressed 157 features to 42 principal components with negligible change to the optimal $K$, Silhouette score, or cluster distribution.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -526,13 +515,13 @@ For comparative context, PCA was also applied to the uncurated \textbf{Naive pip
 The impact of the custom domain weighting function was isolated by comparing two pipelines operating on the identical active portfolio of 633,279 observations, with 19 features post-filtration and MinMaxScaler:
 
 \begin{itemize}
-    \item \textbf{Unweighted (Improved):} No domain weights applied
-    \item \textbf{Weighted (EndComp):} Domain weights applied such that each of the five core financial domains contributes exactly 20\% of aggregate feature weight, with each individual feature within domain $d$ multiplied by $\frac{1}{5 \cdot n_d}$
+    \item \textbf{Unweighted (Improved):} No domain weights applied.
+    \item \textbf{Weighted (EndComp):} Domain weights applied such that each of the five core financial domains contributes exactly 20\% of aggregate feature weight, with each individual feature within domain $d$ multiplied by $\frac{1}{5 \cdot n_d}$.
 \end{itemize}
 
 Table~\ref{tab:weighting_comparison} reports K-Means outcomes for both pipelines under non-logarithmic and logarithmic transformation variants. The unweighted pipeline converged on $K=2$ under both variants, while the weighted pipeline converged on $K=4$ under both variants.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -556,9 +545,9 @@ Table~\ref{tab:weighting_comparison} reports K-Means outcomes for both pipelines
     \label{tab:weighting_comparison}
 \end{table}
 
-This divergence is clearly visualized in Figure~\ref{fig:weighting_silhouette}, where the unweighted Silhouette trajectory (left) peaks at $K=2$ and the weighted trajectory (right) peaks distinctly at $K=4$. Both trajectories are generated from the non-logarithmic, MinMaxScaler, active 633k, no PCA configuration.
+This divergence is clearly visualized in Figure~\ref{fig:weighting_silhouette}, where the unweighted Silhouette trajectory in the left panel peaks at $K=2$ and the weighted trajectory in the right panel peaks distinctly at $K=4$. Both trajectories are generated from the non-logarithmic configuration.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Normal/Improved/minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
@@ -566,9 +555,9 @@ This divergence is clearly visualized in Figure~\ref{fig:weighting_silhouette}, 
     \label{fig:weighting_silhouette}
 \end{figure}
 
-Figure~\ref{fig:weight_kmeans_boxplots} shows the unscaled feature distributions across the four clusters produced by the weighted pipeline (non-logarithmic, MinMaxScaler, active 633k, no PCA). Five features are plotted—Feature\_1 through Feature\_5—each representing one variable drawn from each of the five core financial domain groups retained in the model.
+Figure~\ref{fig:weight_kmeans_boxplots} shows the unscaled feature distributions across the four clusters produced by the weighted pipeline. Five features are plotted, Feature\_1 through Feature\_5, each representing one variable drawn from each of the five core financial domain groups retained in the model.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \makebox[\textwidth][c]{%
         \includegraphics[width=1\textwidth]{Results/EndComp/weight_and_minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}
     }
@@ -584,13 +573,13 @@ Figure~\ref{fig:weight_kmeans_boxplots} shows the unscaled feature distributions
 Table~\ref{tab:kmeans_vs_kmedians_comparison} details the outcomes of K-Means and K-Medians on two pipeline configurations:
 
 \begin{enumerate}
-    \item \textbf{Optimized (Weighted, Active):} 633,279 observations, 19 features post-filtration, domain-weighted, MinMaxScaler, non-logarithmic, no PCA
-    \item \textbf{Uncurated (Naive, Full):} 999,128 observations, 220 features post-filtration, no domain weights, MinMaxScaler, non-logarithmic, no PCA
+    \item \textbf{Optimized (Weighted, Active):} 633,279 observations, 19 features post-filtration, domain-weighted, MinMaxScaler, non-logarithmic, no PCA.
+    \item \textbf{Uncurated (Naive, Full):} 999,128 observations, 220 features post-filtration, no domain weights, MinMaxScaler, non-logarithmic, no PCA.
 \end{enumerate}
 
 On the Optimized pipeline, K-Means converged on a $K=4$ structure while K-Medians settled on $K=2$. On the Naive pipeline, the algorithms converged on $K=2$ and $K=3$ respectively, with K-Medians identifying an additional partition that K-Means did not resolve. Full metric details are reported in Table~\ref{tab:kmeans_vs_kmedians_comparison}.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -614,9 +603,9 @@ On the Optimized pipeline, K-Means converged on a $K=4$ structure while K-Median
     \label{tab:kmeans_vs_kmedians_comparison}
 \end{table}
 
-Figure~\ref{fig:kmeans_vs_kmedians_metrics} shows the Inertia (top row) and Silhouette score (bottom row) trajectories for K-Means (left) and K-Medians (right) on the \textbf{Optimized Weighted pipeline}. The K-Means Inertia trajectory exhibits a pronounced geometric inflection at $K=4$, with the Silhouette score peaking at the same $K$. The K-Medians Inertia trajectory does not exhibit a comparable inflection point, with the Silhouette score peaking at $K=2$.
+Figure~\ref{fig:kmeans_vs_kmedians_metrics} shows the Inertia and Silhouette score trajectories for K-Means and K-Medians on the \textbf{Optimized Weighted pipeline}. The K-Means Inertia trajectory exhibits a pronounced geometric inflection at $K=4$, with the Silhouette score peaking at the same $K$. The K-Medians Inertia trajectory does not exhibit a comparable inflection point, with the Silhouette score peaking at $K=2$.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmedians_inertia_objective_by_k.png}
@@ -627,9 +616,9 @@ Figure~\ref{fig:kmeans_vs_kmedians_metrics} shows the Inertia (top row) and Silh
     \label{fig:kmeans_vs_kmedians_metrics}
 \end{figure}
 
-Figure~\ref{fig:naive_kmeans_vs_kmedians_metrics} shows the equivalent trajectories for the \textbf{Uncurated Naive pipeline} (full 999,128 observations, 220 features, no domain weights, MinMaxScaler, non-logarithmic, no PCA). On this pipeline, K-Medians resolves a $K=3$ structure while K-Means resolves only a $K=2$ partition under the same configuration.
+Figure~\ref{fig:naive_kmeans_vs_kmedians_metrics} shows the equivalent trajectories for the \textbf{Uncurated Naive pipeline}. On this pipeline, K-Medians resolves a $K=3$ structure while K-Means resolves only a $K=2$ partition under the same configuration.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Normal/Naive/minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Normal/Naive/minmax/kmedians_inertia_objective_by_k.png}
@@ -646,14 +635,14 @@ Figure~\ref{fig:naive_kmeans_vs_kmedians_metrics} shows the equivalent trajector
 Standard K-Means was compared against Mini-Batch K-Means across three dimensional configurations, all using MinMaxScaler and non-logarithmic transformation:
 
 \begin{enumerate}
-    \item \textbf{Optimized (19 features):} Active 633,279 observations, domain-weighted, no PCA
-    \item \textbf{PCA-Reduced (3 features):} Active 633,279 observations, domain-weighted, PCA to 3 components
-    \item \textbf{Uncurated (220 features):} Full 999,128 observations, no domain weights, no PCA
+    \item \textbf{Optimized:} Active 633,279 observations, 19 features, domain-weighted, no PCA.
+    \item \textbf{PCA-Reduced:} Active 633,279 observations, 3 features, domain-weighted.
+    \item \textbf{Uncurated:} Full 999,128 observations, 220 features, no domain weights, no PCA.
 \end{enumerate}
 
-Full results are reported in Table~\ref{tab:kmeans_vs_mbkmeans_comparison}. On the Optimized 19-feature space, standard K-Means converged faster and on a more stable $K=4$ partition, while Mini-Batch produced a more fractured $K=5$ configuration. On the PCA-reduced 3-feature space, both algorithms converged on $K=4$ with near-identical cluster distributions. On the uncurated 220-feature space, Mini-Batch reduced convergence time from 9.64 to 4.54 seconds and resolved a $K=4$ structure where standard K-Means produced only $K=2$.
+Full results are reported in Table~\ref{tab:kmeans_vs_mbkmeans_comparison}. On the Optimized 19-feature space, standard K-Means converged faster and on a more stable $K=4$ partition, while Mini-Batch produced a more fractured $K=5$ configuration. On the PCA-reduced space, both algorithms converged on $K=4$ with near-identical cluster distributions. On the uncurated 220-feature space, Mini-Batch reduced convergence time from 9.64 to 4.54 seconds and resolved a $K=4$ structure where standard K-Means produced only $K=2$.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -678,13 +667,13 @@ Full results are reported in Table~\ref{tab:kmeans_vs_mbkmeans_comparison}. On t
     \bottomrule
     \end{tabular}%
     }
-    \caption{Standard K-Means versus Mini-Batch K-Means across three pipeline configurations: \textbf{Optimized} (active 633,279 observations, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA), \textbf{PCA-Reduced} (active 633,279 observations, 3 PCA components, domain-weighted, MinMaxScaler, non-logarithmic), and \textbf{Uncurated} (full 999,128 observations, 220 features, no domain weights, MinMaxScaler, non-logarithmic, no PCA).}
+    \caption{Standard K-Means versus Mini-Batch K-Means across three pipeline configurations.}
     \label{tab:kmeans_vs_mbkmeans_comparison}
 \end{table}
 
-The Silhouette score trajectories for standard K-Means and Mini-Batch K-Means on the Optimized Weighted pipeline are shown in Figure~\ref{fig:mbkmeans_vs_kmeans_metrics} (standard K-Means left, Mini-Batch right).
+The Silhouette score trajectories for standard K-Means and Mini-Batch K-Means on the Optimized Weighted pipeline are shown in Figure~\ref{fig:mbkmeans_vs_kmeans_metrics}.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/mbkmeans_silhouette_score_by_k.png}
@@ -695,9 +684,9 @@ The Silhouette score trajectories for standard K-Means and Mini-Batch K-Means on
 \section{Financial Profiling of Customer Archetypes}
 \label{sec:results_profiling}
 
-The definitive pipeline—standard K-Means, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA, active 633,279 observations—produced the optimal $K=4$ partition. Figure~\ref{fig:final_kmeans_metrics} shows the global Inertia (left) and Silhouette score (right) trajectories confirming this optimum, with a pronounced elbow in the Inertia curve and a peak Silhouette score both occurring at $K=4$.
+The definitive pipeline, utilizing standard K-Means, 19 features, domain-weighting, MinMaxScaler, and no PCA on the active 633,279 observations, produced the optimal $K=4$ partition. Figure~\ref{fig:final_kmeans_metrics} shows the global Inertia and Silhouette score trajectories confirming this optimum, with a pronounced elbow in the Inertia curve and a peak Silhouette score both occurring at $K=4$.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
@@ -707,7 +696,7 @@ The definitive pipeline—standard K-Means, 19 features, domain-weighted, MinMax
 
 The four cluster assignments, together with the two heuristic pre-segmentation groups, were mapped back to the full 999,128 observations. Table~\ref{tab:final_cluster_distribution} reports the resulting population distribution across all six segments.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -729,23 +718,23 @@ The four cluster assignments, together with the two heuristic pre-segmentation g
     \bottomrule
     \end{tabular}%
     }
-    \caption{Population distribution across heuristic pre-segmentation groups and K-Means active archetypes, mapped back to the full 999,128 observations. Clustering produced by the definitive pipeline: K-Means, $K=4$, active 633,279 observations, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA.}
+    \caption{Population distribution across heuristic pre-segmentation groups and K-Means active archetypes, mapped back to the full 999,128 observations.}
     \label{tab:final_cluster_distribution}
 \end{table}
 
-Figure~\ref{fig:archetype_boxplots} plots the distributions of Feature\_1 through Feature\_5 for each of the four active clusters, mapped back to the original unscaled feature space and obfuscated. Each of Feature\_1 through Feature\_5 represents one variable drawn from each of the five core financial domain groups.
+Figure~\ref{fig:archetype_boxplots} plots the distributions of Feature\_1 through Feature\_5 for each of the four active clusters, mapped back to the original unscaled feature space and obfuscated. Each feature represents one variable drawn from each of the five core financial domain groups.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.9\textwidth]{Results/EndComp/weight_and_minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}
     }
-    \caption{Unscaled distributions of Feature\_1 through Feature\_5 across the four K-Means archetypes (KMEANS\_0 through KMEANS\_3). Each feature represents one variable from each of the five core financial domain groups. Cluster assignments produced by the definitive pipeline: K-Means, $K=4$, active 633,279 observations, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA.}
+    \caption{Unscaled distributions of Feature\_1 through Feature\_5 across the four K-Means archetypes. Each feature represents one variable from each of the five core financial domain groups.}
     \label{fig:archetype_boxplots}
 \end{figure}
 
 Figure~\ref{fig:kmeans_0_detailed} provides granular sub-feature profiling for KMEANS\_0, showing the unscaled distributions of all sub-features within each of the five core financial domain groups for accounts assigned to that cluster. Equivalent profiling for KMEANS\_1 through KMEANS\_3 is provided in Appendix~\ref{app:detailed_cluster_profiles}.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_0_detailed_analysis_obfuscated.png}
     \caption{Granular sub-feature profiling for KMEANS\_0 across all five core financial domain groups, plotted on the original unscaled data. Equivalent profiles for KMEANS\_1 through KMEANS\_3 are provided in Appendix~\ref{app:detailed_cluster_profiles}.}
@@ -755,14 +744,14 @@ Figure~\ref{fig:kmeans_0_detailed} provides granular sub-feature profiling for K
 \section{Temporal Dynamics and Cluster Stability}
 \label{sec:results_temporal}
 
-A temporal analysis was conducted on the subset of accounts with observations in both 2024 and 2025. For each such account, the cluster label assigned in each year was recorded under the definitive pipeline configuration (K-Means, $K=4$, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA, active portfolio). A cross-tabulation of the 2024 and 2025 cluster assignments was row-normalized to yield empirical transition probabilities across the four active K-Means clusters and the two heuristic groups.
+A temporal analysis was conducted on the subset of accounts with observations in both 2024 and 2025. For each such account, the cluster label assigned in each year was recorded under the definitive pipeline configuration. A cross-tabulation of the 2024 and 2025 cluster assignments was row-normalized to yield empirical transition probabilities across the four active K-Means clusters and the two heuristic groups.
 
 Figure~\ref{fig:kmeans_transition} presents the resulting row-normalized transition probability matrix. Each row represents the cluster assignment in 2024 and each column the assignment in 2025, with cell values indicating the proportion of accounts in each origin segment that transitioned to or remained within each destination segment over the observed period.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{Results/EndComp/weight_and_minmax/kmeans_transition.png}
-    \caption{Row-normalized transition probability matrix for the active K-Means clusters (KMEANS\_0 through KMEANS\_3) and heuristic groups (Group Z and Group C), tracking cluster assignments from 2024 to 2025 under the definitive pipeline (K-Means, $K=4$, active portfolio, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA).}
+    \caption{Row-normalized transition probability matrix for the active K-Means clusters and heuristic groups, tracking cluster assignments from 2024 to 2025 under the definitive pipeline.}
     \label{fig:kmeans_transition}
 \end{figure}
 
@@ -773,50 +762,46 @@ This chapter synthesizes the empirical findings detailed in Chapter \ref{chap:Re
 
 \section{The Structural Necessity of Preprocessing Constraints}
 
-The evaluation of scaling methodologies (see Table \ref{tab:scaler_comparison_16_features} and Figure \ref{fig:minmax_vs_std_silscore}) confirmed that the intrinsic geometry of financial data requires rigid spatial boundaries. While both MinMaxScaler and StandardScaler produced viable cluster distributions, MinMaxScaler was deliberately selected as the definitive global scaler due to its specific handling of absolute limits and domain characteristics.
+The evaluation of scaling methodologies confirmed that the intrinsic geometry of financial data requires rigid spatial boundaries. While both MinMaxScaler and StandardScaler produced viable cluster distributions, MinMaxScaler was deliberately selected as the definitive global scaler due to its specific handling of absolute limits and domain characteristics.
 
-In credit card portfolios, many core features inherently share base units—such as absolute monetary values (currency) or frequency metrics (transaction counts). A defining characteristic of this data is its strict lower bound: an account cannot have negative transactions or negative spend. MinMaxScaler explicitly preserves this physical reality. By binding the data to a strict $[0, 1]$ interval, an original value of zero maps perfectly to a scaled value of zero. 
+In credit card portfolios, many core features inherently share base units, such as absolute monetary values or frequency metrics. A defining characteristic of this data is its strict lower bound. An account cannot have negative transactions or negative spend. MinMaxScaler explicitly preserves this physical reality. By binding the data to a strict $[0, 1]$ interval, an original value of zero maps perfectly to a scaled value of zero. Conversely, StandardScaler standardizes features by centering them around a mean of zero. Applying this to heavily right-skewed financial data artificially shifts genuine zero-activity metrics into negative vector space. This shift mathematically destroys the data's natural sparsity and distorts the proportional distance between a dormant behavior and an active one. Because our features share similar physical interpretations, bounding them to a proportional $[0, 1]$ span ensures they are evaluated on an equal playing field without violating their natural lower limits. The empirical results support this theoretical preference; MinMaxScaler achieved a higher and more stable peak Silhouette score compared to StandardScaler, confirming its superior preservation of cluster cohesion.
 
-Conversely, StandardScaler standardizes features by centering them around a mean of zero. Applying this to heavily right-skewed financial data artificially shifts genuine zero-activity metrics into negative vector space. This shift mathematically destroys the data's natural sparsity and distorts the proportional distance between a dormant behavior and an active one. Because our features share similar physical interpretations, bounding them to a proportional $[0, 1]$ span ensures they are evaluated on an equal playing field without violating their natural lower limits. 
-
-The empirical results support this theoretical preference; MinMaxScaler achieved a higher and more stable peak Silhouette score ($0.5469$ at $K=2$) compared to StandardScaler ($0.4991$), confirming its superior preservation of cluster cohesion. Finally, while theoretical arguments can be made for Robust scaling in heavy-tailed data, its application to this specific domain resulted in severely skewed $L_2$ norm distances. As shown in Table \ref{tab:scaler_comparison_157_features}, it allowed unbounded transaction sums to disproportionately dominate the spatial topography, collapsing the portfolio into a near-degenerate single cluster.
-
-Similarly, the profound divergence between the uncurated Naive baseline and the domain-driven Normal approach (illustrated in Figures \ref{fig:grid_search_inertia} and \ref{fig:grid_search_naive_vs_normal}) highlights the curse of dimensionality in unsupervised learning. The bloated, 157-dimensional Naive space mathematically diluted the distance metrics. By utilizing rigorous business-logic curation to reduce the feature space to 16 variables, the distance-based algorithms were able to evaluate core behaviors without being blinded by multicollinear noise.
+Finally, while theoretical arguments can be made for Robust scaling in heavy-tailed data, its application to this specific domain resulted in severely skewed $L_2$ norm distances. As shown in Table \ref{tab:scaler_comparison_157_features}, it allowed unbounded transaction sums to disproportionately dominate the spatial topography, collapsing the portfolio into a near-degenerate single cluster. Similarly, the profound divergence between the uncurated Naive baseline and the domain-driven Normal approach highlights the curse of dimensionality in unsupervised learning. The bloated, 157-dimensional Naive space mathematically diluted the distance metrics. By utilizing rigorous business-logic curation to reduce the feature space to 16 variables, the distance-based algorithms were able to evaluate core behaviors without being blinded by multicollinear noise.
 
 \section{Addressing Operational Extremes via Pre-segmentation}
 
-A fundamental vulnerability exposed during early pipeline testing was the algorithms' sensitivity to structural sparsity. Group Z alone accounts for 33.79\% of the data—representing accounts with exactly zero user-initiated transactions (Table \ref{tab:pipeline_summary}). When included in the primary dataset, this demographic acted as a massive mathematical sink in Euclidean space. 
+A fundamental vulnerability exposed during early pipeline testing was the algorithms' sensitivity to structural sparsity. Group Z alone accounts for 33.79\% of the data, representing accounts with exactly zero user-initiated transactions, as detailed in Table \ref{tab:pipeline_summary}. When included in the primary dataset, this demographic acted as a massive mathematical sink in Euclidean space. As visualized in the left panel of the baseline boxplots in Figure \ref{fig:presegmentation_boxplots}, the inclusion of dormant accounts heavily crushed the internal variance toward zero. This forced the algorithm into generating a trivial, high-density binary boundary between active and inactive accounts.
 
-As visualized in the baseline boxplots (Figure \ref{fig:presegmentation_boxplots}, left panel), the inclusion of dormant accounts heavily crushed the internal variance toward zero. This forced the algorithm into generating a trivial, high-density binary boundary between `active' and `inactive' accounts. By deterministically filtering these known operational extremes, the variance within the core active portfolio expanded (Figure \ref{fig:presegmentation_boxplots}, right panel). Forcing the algorithm to evaluate only the 633,279 active profiles compelled the model to learn genuine financial behaviors rather than simplistic density divides.
+By deterministically filtering these known operational extremes, the variance within the core active portfolio expanded. Forcing the algorithm to evaluate only the 633,279 active profiles compelled the model to learn genuine financial behaviors rather than simplistic density divides.
 
 \section{Dimensionality Reduction and Interpretability Trade-offs}
 
-While Principal Component Analysis (PCA) successfully stabilized the uncurated Naive matrix (Table \ref{tab:pca_naive_comparison})—acting as an algorithmic safeguard against poor data quality—its application within the optimized pipeline presented a significant business trade-off. In the final EndComp matrix, applying PCA yielded only marginal spatial density improvements while reducing computational overhead (Table \ref{tab:pca_comparison} and Figure \ref{fig:pca_silhouette_comparison}). However, the resulting principal components obfuscated direct feature interpretation. Because the practical utility of these clusters relies on business stakeholders understanding and acting upon explicit behavioral traits, retaining direct linear interpretability was prioritized over the slight mathematical gains offered by orthogonal compression.
+While Principal Component Analysis successfully stabilized the uncurated Naive matrix, detailed in Table \ref{tab:pca_naive_comparison}, acting as an algorithmic safeguard against poor data quality, its application within the optimized pipeline presented a significant business trade-off. In the final EndComp matrix, applying PCA yielded only marginal spatial density improvements while reducing computational overhead, as demonstrated in Table \ref{tab:pca_comparison} and Figure \ref{fig:pca_silhouette_comparison}. However, the resulting principal components obfuscated direct feature interpretation. Because the practical utility of these clusters relies on business stakeholders understanding and acting upon explicit behavioral traits, retaining direct linear interpretability was prioritized over the slight mathematical gains offered by orthogonal compression.
 
-Furthermore, applying explicit domain weights proved vital for breaking the dataset's tendency toward binary separation. While the introduction of weights slightly lowered the global Silhouette score (a recognized mathematical tradeoff when manipulating feature variance), it successfully fractured the portfolio into a richer, actionable $K=4$ structure, as contrasted in Table \ref{tab:weighting_comparison} and Figure \ref{fig:weighting_silhouette}.
+Furthermore, applying explicit domain weights proved vital for breaking the dataset's tendency toward binary separation. While the introduction of weights slightly lowered the global Silhouette score, which is a recognized mathematical tradeoff when manipulating feature variance, it successfully fractured the portfolio into a richer, actionable $K=4$ structure as contrasted in Table \ref{tab:weighting_comparison} and Figure \ref{fig:weighting_silhouette}.
 
 \section{The Computational Cost of Robustness: Evaluating K-Medians}
 
-The comparative evaluation of $K$-means and $K$-medians effectively illustrated how different objective functions navigate financial noise. The $K$-medians algorithm, optimizing the $L_1$ norm (Manhattan distance), demonstrated theoretical robustness against structural outliers, actively bypassing the dense binary traps that ensnared $K$-means when processing uncurated data (Figure \ref{fig:naive_kmeans_vs_kmedians_metrics}). 
+The comparative evaluation of $K$-means and $K$-medians effectively illustrated how different objective functions navigate financial noise. The $K$-medians algorithm, optimizing the $L_1$ norm or Manhattan distance, demonstrated theoretical robustness against structural outliers. It actively bypassed the dense binary traps that ensnared $K$-means when processing uncurated data, as shown in Figure \ref{fig:naive_kmeans_vs_kmedians_metrics}. 
 
-However, this robustness incurs a severe computational penalty that makes $K$-medians largely unsuitable for naive, high-dimensional pipelines. As detailed in Table \ref{tab:kmeans_vs_kmedians_comparison}, executing $K$-medians on the uncurated 220-feature space required 65.73 seconds to converge, nearly seven times longer than the 9.64 seconds required by standard $K$-means. While K-Medians successfully identified a more nuanced $K=3$ structure, the extensive runtime heavily hinders its viability for automated iterations on massive, uncurated feature sets. Furthermore, once applied to the fully optimized, anomaly-free matrix, the $L_2$ optimization of $K$-means generated substantially denser, more compact substructures at a fraction of the time (Figure \ref{fig:kmeans_vs_kmedians_metrics} and Table \ref{tab:kmeans_vs_kmedians_comparison}), cementing its selection for the final pipeline.
+However, this robustness incurs a severe computational penalty that makes $K$-medians largely unsuitable for naive, high-dimensional pipelines. As detailed in Table \ref{tab:kmeans_vs_kmedians_comparison}, executing $K$-medians on the uncurated 220-feature space required 65.73 seconds to converge, nearly seven times longer than the 9.64 seconds required by standard $K$-means. While K-Medians successfully identified a more nuanced $K=3$ structure, the extensive runtime heavily hinders its viability for automated iterations on massive, uncurated feature sets. Furthermore, once applied to the fully optimized, anomaly-free matrix, the $L_2$ optimization of $K$-means generated substantially denser, more compact substructures at a fraction of the time, cementing its selection for the final pipeline as illustrated in Figure \ref{fig:kmeans_vs_kmedians_metrics} and Table \ref{tab:kmeans_vs_kmedians_comparison}.
 
 \section{The Viability of Mini-Batch K-Means at Scale}
 
-To address the computational bottlenecks associated with high-dimensional data, Mini-Batch $K$-means was evaluated as a scalable alternative. The experimental results (Table \ref{tab:kmeans_vs_mbkmeans_comparison}) proved its viability as a rapid exploratory tool on massive, uncurated datasets. When applied to the 220-feature Naive pipeline, Mini-Batch reduced the convergence time by more than half—dropping from 9.64 seconds to 4.54 seconds. Crucially, this speed increase did not come at the cost of analytical depth; in fact, the Mini-Batch algorithm resolved a more complex $K=4$ structure (with a Silhouette score of 0.5174) where standard $K$-means only produced a binary $K=2$ partition. This demonstrates that Mini-Batch $K$-means can successfully preserve and even highlight latent cluster differences while dramatically accelerating processing times at scale.
+To address the computational bottlenecks associated with high-dimensional data, Mini-Batch $K$-means was evaluated as a scalable alternative. The experimental results, shown in Table \ref{tab:kmeans_vs_mbkmeans_comparison}, proved its viability as a rapid exploratory tool on massive, uncurated datasets. When applied to the 220-feature Naive pipeline, Mini-Batch reduced the convergence time by more than half, dropping from 9.64 seconds to 4.54 seconds. Crucially, this speed increase did not come at the cost of analytical depth. In fact, the Mini-Batch algorithm resolved a more complex $K=4$ structure where standard $K$-means only produced a binary $K=2$ partition. This demonstrates that Mini-Batch $K$-means can successfully preserve and even highlight latent cluster differences while dramatically accelerating processing times at scale.
 
-However, the results also inverted its expected utility once the dataset was properly curated. While highly effective in massive dimensional spaces, it introduced unnecessary stochastic instability when applied to the refined 19-variable space (Figure \ref{fig:mbkmeans_vs_kmeans_metrics}). Because the domain-driven feature engineering solved the dimensionality problem at its root, standard $K$-means operated near-instantaneously (0.44 seconds) on the final matrix, rendering stochastic batch estimation functionally obsolete for this specific optimized architecture.
+However, the results also inverted its expected utility once the dataset was properly curated. While highly effective in massive dimensional spaces, it introduced unnecessary stochastic instability when applied to the refined 19-variable space, as observed in Figure \ref{fig:mbkmeans_vs_kmeans_metrics}. Because the domain-driven feature engineering solved the dimensionality problem at its root, standard $K$-means operated near-instantaneously on the final matrix, rendering stochastic batch estimation functionally obsolete for this specific optimized architecture.
 
 \section{Economic Profiling and Behavioral Stickiness}
 
-The translation of abstract spatial boundaries into unscaled financial features (Figures \ref{fig:archetype_boxplots} and \ref{fig:kmeans_0_detailed}) validates the pipeline's utility. The four isolated archetypes (detailed in Table \ref{tab:final_cluster_distribution}) offer a sophisticated taxonomy of the active portfolio:
+The translation of abstract spatial boundaries into unscaled financial features validates the pipeline's utility, as depicted in Figures \ref{fig:archetype_boxplots} and \ref{fig:kmeans_0_detailed}. The four isolated archetypes, detailed in Table \ref{tab:final_cluster_distribution}, offer a sophisticated taxonomy of the active portfolio:
 \begin{itemize}
-    \item \textbf{KMEANS\_0 (13.56\% of total):} Captures customers with average baseline activity (Feature\_1), but distinguishes them through high secondary utilization (Feature\_2) and a unique above-average signature in Feature\_3.
-    \item \textbf{KMEANS\_1 (26.25\% of total):} Represents the largest segment of the active base. Exhibiting lower overall activity, this group acts as a transitional bridge between true dormancy (Group Z) and higher engagement tiers.
-    \item \textbf{KMEANS\_2 and KMEANS\_3:} Both groups capture the upper limits of prime utilization (Feature\_1), but their geometric separation is driven by distinct divergences in subsequent financial habits, specifically across Feature\_2 and Feature\_4.
+    \item \textbf{KMEANS\_0:} Comprising 13.56\% of the total portfolio, this segment captures customers with average baseline activity in Feature\_1, but distinguishes them through high secondary utilization in Feature\_2 and a unique above-average signature in Feature\_3.
+    \item \textbf{KMEANS\_1:} Comprising 26.25\% of the total portfolio, this segment represents the largest portion of the active base. Exhibiting lower overall activity, this group acts as a transitional bridge between true dormancy in Group Z and higher engagement tiers.
+    \item \textbf{KMEANS\_2 and KMEANS\_3:} Both groups capture the upper limits of prime utilization in Feature\_1, but their geometric separation is driven by distinct divergences in subsequent financial habits, specifically across Feature\_2 and Feature\_4.
 \end{itemize}
 
-Finally, the temporal transition matrix (Figure \ref{fig:kmeans_transition}) confirms that while customer behavior is inherently non-stationary, the defined archetypes are highly structured. With retention rates generally exceeding 50\% year-over-year, the clusters demonstrate strong longitudinal stability. Furthermore, quantifying specific migration vectors—such as the 10\% probability of Group Z accounts activating into KMEANS\_1—provides a rigorous empirical foundation for targeted, lifecycle-driven portfolio management.
+Finally, the temporal transition matrix in Figure \ref{fig:kmeans_transition} confirms that while customer behavior is inherently non-stationary, the defined archetypes are highly structured. With retention rates generally exceeding 50\% year-over-year, the clusters demonstrate strong longitudinal stability. Furthermore, quantifying specific migration vectors, such as the 10\% probability of Group Z accounts activating into KMEANS\_1, provides a rigorous empirical foundation for targeted, lifecycle-driven portfolio management.
 
 \chapter{Potential Improvements and Future Work}
 \label{chap:Improvements}
@@ -824,31 +809,62 @@ Finally, the temporal transition matrix (Figure \ref{fig:kmeans_transition}) con
 While this thesis successfully demonstrates a scalable, end-to-end pipeline for algorithmic customer segmentation, the methodology inherently involves mathematical and operational trade-offs. Building upon the foundational baseline established in this research, several avenues for future work can further refine the clustering architecture and capture deeper, more complex nuances in customer behavior.
 
 \section{Compositional Feature Engineering and Proportional Normalization}
-The empirical success of the MinMaxScaler—which effectively bounded the feature space to a strict $[0, 1]$ interval—suggests that the clustering algorithms perform optimally when evaluating normalized, proportional geometries. Currently, the methodology relies on absolute aggregated sums for each financial category. While explicit domain weighting helped balance these categories, utilizing absolute monetary values means the algorithm inherently evaluates both \textit{behavioral preference} (where a customer spends) and \textit{magnitude} (how much wealth they possess) simultaneously. This can sometimes cause K-means to disproportionately group accounts based on sheer volume rather than nuanced transaction habits.
+The empirical success of the MinMaxScaler, which effectively bounded the feature space to a strict $[0, 1]$ interval, suggests that the clustering algorithms perform optimally when evaluating normalized, proportional geometries. Currently, the methodology relies on absolute aggregated sums for each financial category. While explicit domain weighting helped balance these categories, utilizing absolute monetary values means the algorithm inherently evaluates both the behavioral preference of where a customer spends, and the magnitude of how much wealth they possess simultaneously. This can sometimes cause K-means to disproportionately group accounts based on sheer volume rather than nuanced transaction habits.
 
-A highly promising avenue for future work is the transition from absolute aggregations to compositional data normalization. Instead of feeding the model the absolute sum of each category, future iterations should normalize these values as a percentage of the customer's total activity (e.g., defining a specific transaction category as representing 40\% of the account's total transaction volume). To ensure the overall scale of the customer's financial footprint is not lost, the model would retain a single, isolated feature representing "Total Expenditure." By mathematically decoupling the scale of spending from the composition of spending, distance-based algorithms could more effectively isolate true behavioral archetypes, rather than clustering primarily on wealth boundaries.
+A highly promising avenue for future work is the transition from absolute aggregations to compositional data normalization. Instead of feeding the model the absolute sum of each category, future iterations should normalize these values as a percentage of the customer's total activity, for example, defining a specific transaction category as representing 40\% of the account's total transaction volume. To ensure the overall scale of the customer's financial footprint is not lost, the model would retain a single, isolated feature representing Total Expenditure. By mathematically decoupling the scale of spending from the composition of spending, distance-based algorithms could more effectively isolate true behavioral archetypes, rather than clustering primarily on wealth boundaries.
 
 \section{Temporal Clustering and Time-Series Analysis}
-The current methodology relies on aggregating raw transactional records into unified annual snapshots. While this approach successfully stabilizes short-term noise to isolate macro-level customer archetypes, it inherently collapses the temporal dimension. As a result, intra-year seasonality, short-term behavioral shifts, and sequence-dependent spending habits are obscured. Future research should move away from strict static aggregation and explore temporal clustering algorithms. Utilizing techniques such as Dynamic Time Warping (DTW) or recurrent neural network (RNN) based autoencoders would allow the models to cluster the actual temporal trajectories of the accounts. Evaluating chronological transaction sequences rather than static sums would provide deeper insights into the velocity of customer lifecycle changes.
+The current methodology relies on aggregating raw transactional records into unified annual snapshots. While this approach successfully stabilizes short-term noise to isolate macro-level customer archetypes, it inherently collapses the temporal dimension. As a result, intra-year seasonality, short-term behavioral shifts, and sequence-dependent spending habits are obscured.
+
+Future research should move away from strict static aggregation and explore temporal clustering algorithms. Utilizing techniques such as Dynamic Time Warping, or recurrent neural network-based autoencoders would allow the models to cluster the actual temporal trajectories of the accounts. Evaluating chronological transaction sequences rather than static sums would provide deeper insights into the velocity of customer lifecycle changes.
 
 \section{Hierarchical and Second-Stage Sub-Clustering}
-The optimized $K$-means pipeline effectively established a robust macro-level taxonomy comprising four distinct active archetypes. However, evaluating the final clusters in their original feature space reveals a degree of structural incompleteness. Certain features continue to exhibit heavily skewed distributions with significant outliers, leading to overlapping behavioral boundaries across the defined segments. To address this variance, future iterations should explore a hierarchical or second-stage clustering framework. By isolating a specific macro-cluster—such as the highly populated transitional group, KMEANS\_1—and applying a secondary, localized clustering algorithm directly to that subset, analysts could extract highly granular micro-behaviors that are otherwise overshadowed by the global variance of the full portfolio.
+The optimized $K$-means pipeline effectively established a robust macro-level taxonomy comprising four distinct active archetypes. However, evaluating the final clusters in their original feature space reveals a degree of structural incompleteness. Certain features continue to exhibit heavily skewed distributions with significant outliers, leading to overlapping behavioral boundaries across the defined segments.
 
-\sectionsection{Non-Linear Dimensionality Reduction and Soft Clustering}
-To prioritize explicit business interpretability, linear efficiency, and computational scale, this study primarily relied on PCA and algorithms optimizing the $L_2$ norm. While this linear approach is highly effective as an initial, explainable clustering strategy, high-dimensional financial data frequently lies on complex, non-linear manifolds. Future methodologies should investigate the utilization of Uniform Manifold Approximation and Projection (UMAP). Although running UMAP on the full population was computationally prohibitive for this thesis, applying partial UMAP to strategically down-sampled subsets or specific pre-segmented cohorts could unlock complex non-linear relationships.
+To address this variance, future iterations should explore a hierarchical or second-stage clustering framework. By isolating a specific macro-cluster, such as the highly populated transitional group KMEANS\_1, and applying a secondary, localized clustering algorithm directly to that subset, analysts could extract highly granular micro-behaviors that are otherwise overshadowed by the global variance of the full portfolio.
 
-Furthermore, these non-linear projections could be paired with density-based or probabilistic clustering algorithms, such as HDBSCAN or Gaussian Mixture Models (GMM). Specifically, GMMs would be highly beneficial for addressing the cluster overlap observed in the current results. Because GMMs utilize a "soft" clustering approach, they assign a mathematical probability of an account belonging to multiple clusters rather than forcing a strict, deterministic boundary. This probabilistic framework accurately mirrors the fluid, overlapping realities of retail banking behavior and would serve as a powerful evolution of the methodology presented in this research.
+\section{Non-Linear Dimensionality Reduction and Soft Clustering}
+To prioritize explicit business interpretability, linear efficiency, and computational scale, this study primarily relied on PCA and algorithms optimizing the $L_2$ norm. While this linear approach is highly effective as an initial, explainable clustering strategy, high-dimensional financial data frequently lies on complex, non-linear manifolds.
+
+Future methodologies should investigate the utilization of Uniform Manifold Approximation and Projection, or UMAP. Although running UMAP on the full population was computationally prohibitive for this thesis, applying partial UMAP to strategically down-sampled subsets or specific pre-segmented cohorts could unlock complex non-linear relationships. Furthermore, these non-linear projections could be paired with density-based or probabilistic clustering algorithms, such as HDBSCAN or Gaussian Mixture Models. Specifically, Gaussian Mixture Models would be highly beneficial for addressing the cluster overlap observed in the current results. Because Gaussian Mixture Models utilize a soft clustering approach, they assign a mathematical probability of an account belonging to multiple clusters rather than forcing a strict, deterministic boundary. This probabilistic framework accurately mirrors the fluid, overlapping realities of retail banking behavior and would serve as a powerful evolution of the methodology presented in this research.
 
 \chapter{Conclusion}
 \label{chap:Conclusion}
 
 The modern retail banking landscape requires robust, scalable methodologies to distill vast, high-dimensional transactional data into actionable customer insights. This thesis successfully designed, evaluated, and implemented an end-to-end unsupervised machine learning pipeline capable of translating complex credit card portfolio data into distinct, economically meaningful customer archetypes.
 
-By systematically evaluating the mathematical behaviors of distance-based clustering algorithms against the physical realities of financial data, this research demonstrates that algorithmic segmentation cannot rely on raw computational power alone. Instead, success requires a highly curated hybrid approach. The empirical findings establish that deterministic heuristic pre-segmentation is structurally vital; by isolating operational extremes---such as dormant accounts---the algorithms are prevented from collapsing into trivial density traps, allowing them to optimize for genuine behavioral variance within the active portfolio.
+By systematically evaluating the mathematical behaviors of distance-based clustering algorithms against the physical realities of financial data, this research demonstrates that algorithmic segmentation cannot rely on raw computational power alone. Instead, success requires a highly curated hybrid approach. The empirical findings establish that deterministic heuristic pre-segmentation is structurally vital. By isolating operational extremes, such as dormant accounts, the algorithms are prevented from collapsing into trivial density traps, allowing them to optimize for genuine behavioral variance within the active portfolio.
 
 Furthermore, this study highlights the necessity of domain-driven feature engineering and rigid spatial boundaries over data-agnostic dimensionality reduction. The selection of MinMaxScaler preserved the intrinsic, zero-bounded proportional geometries of financial features, while strategic domain weighting ensured that core transactional behaviors were evaluated evenly. Under these optimized conditions, standard $K$-means clustering emerged as the most efficient and effective algorithm, successfully partitioning the active portfolio into four distinct, highly stable customer segments.
 
 Ultimately, this thesis bridges the gap between theoretical cluster optimization and practical financial strategy. The resulting customer archetypes move beyond simple, manual heuristics to capture latent, multivariate transactional habits. Supported by empirical evidence of year-over-year longitudinal stability, this methodology provides a reliable, data-driven foundation for lifecycle portfolio management, targeted customer engagement, and future advancements in dynamic behavioral modeling.
+
+\appendix
+\chapter{Detailed Cluster Profiles}
+\label{app:detailed_cluster_profiles}
+
+This appendix provides the extended sub-feature profiling for the remaining active K-Means clusters (KMEANS\_1, KMEANS\_2, and KMEANS\_3). Each figure illustrates the unscaled distributions of all sub-features within each of the five core financial domain groups for the accounts assigned to the respective cluster.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_1_detailed_analysis_obfuscated.png}
+    \caption{Granular sub-feature profiling for KMEANS\_1 across all five core financial domain groups, plotted on the original unscaled data.}
+    \label{fig:kmeans_1_detailed}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_2_detailed_analysis_obfuscated.png}
+    \caption{Granular sub-feature profiling for KMEANS\_2 across all five core financial domain groups, plotted on the original unscaled data.}
+    \label{fig:kmeans_2_detailed}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_3_detailed_analysis_obfuscated.png}
+    \caption{Granular sub-feature profiling for KMEANS\_3 across all five core financial domain groups, plotted on the original unscaled data.}
+    \label{fig:kmeans_3_detailed}
+\end{figure}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
