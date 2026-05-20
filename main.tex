@@ -284,7 +284,7 @@ This chapter outlines the data pipeline and machine learning workflow developed 
         A significant structural challenge within the raw financial data is the substantial presence of inactive accounts, which act as a mathematical sink and cause clustering algorithms to become trapped in suboptimal local minima. The Improved case represents the fully optimized pipeline. It utilizes the same tightly curated, domain-driven feature space established in the Normal case. However, it activates the heuristic pre-segmentation step, detailed in Section~\ref{sec:preprocessing}, to deterministically filter out inactive accounts before applying the unsupervised models. Inactive accounts were explicitly defined and isolated as profiles exhibiting exactly zero user-initiated transactions. By partitioning these accounts beforehand, the subsequent models are forced to focus entirely on the variance within active financial behaviors.
 
 
-\newEmptyPage
+%\newEmptyPage
 
 \chapter{Results}
 \label{chap:Results}
@@ -462,7 +462,7 @@ PCA was evaluated as an optional reduction step applied to the \textbf{Weighted 
     \bottomrule
     \end{tabular}%
     }
-    \caption{K-Means performance on the \textbf{Weighted (EndComp) pipeline}: standard 19-feature space versus PCA-reduced space. Both configurations: active 633,279 observations, domain-weighted, MinMaxScaler, non-logarithmic.}
+    \caption{K-Means performance on the \textbf{Weighted pipeline}: standard 19-feature space versus PCA-reduced space. Both configurations: active 633,279 observations, domain-weighted, MinMaxScaler, non-logarithmic.}
     \label{tab:pca_comparison}
 \end{table}
 
@@ -472,7 +472,7 @@ The Silhouette score trajectories for both configurations are shown in Figure~\r
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_pca_and_minmax/kmeans_silhouette_score_by_k.png}
-    \caption{K-Means Silhouette score trajectories for the \textbf{Weighted (EndComp) pipeline} without PCA (left, 19 features) and with PCA (right, 3 components). Both configurations: active 633,279 observations, domain-weighted, MinMaxScaler, non-logarithmic.}
+    \caption{K-Means Silhouette score trajectories for the \textbf{Weighted pipeline} without PCA (left, 19 features) and with PCA (right, 3 components). Both configurations: active 633,279 observations, domain-weighted, MinMaxScaler, non-logarithmic.}
     \label{fig:pca_silhouette_comparison}
 \end{figure}
 
@@ -515,8 +515,8 @@ For comparative context, PCA was also applied to the uncurated \textbf{Naive pip
 The impact of the custom domain weighting function was isolated by comparing two pipelines operating on the identical active portfolio of 633,279 observations, with 19 features post-filtration and MinMaxScaler:
 
 \begin{itemize}
-    \item \textbf{Unweighted (Improved):} No domain weights applied.
-    \item \textbf{Weighted (EndComp):} Domain weights applied such that each of the five core financial domains contributes exactly 20\% of aggregate feature weight, with each individual feature within domain $d$ multiplied by $\frac{1}{5 \cdot n_d}$.
+    \item \textbf{Unweighted:} No domain weights applied.
+    \item \textbf{Weighted:} Domain weights applied such that each of the five core financial domains contributes exactly 20\% of aggregate feature weight, with each individual feature within domain $d$ multiplied by $\frac{1}{5 \cdot n_d}$.
 \end{itemize}
 
 Table~\ref{tab:weighting_comparison} reports K-Means outcomes for both pipelines under non-logarithmic and logarithmic transformation variants. The unweighted pipeline converged on $K=2$ under both variants, while the weighted pipeline converged on $K=4$ under both variants.
@@ -529,12 +529,12 @@ Table~\ref{tab:weighting_comparison} reports K-Means outcomes for both pipelines
     \toprule
     \textbf{Pipeline} & \textbf{Transformation} & \textbf{Optimal $K$} & \textbf{Silhouette} & \textbf{Time (s)} & \textbf{Cluster Distribution (Size / \%)} \\
     \midrule
-    Unweighted (Improved)
+    Unweighted
     & Min-Max (Normal) & 2 & 0.5024 & 0.33 & C0: 277,617 (43.84\%) \newline C1: 355,662 (56.16\%) \\
     \cmidrule{2-6}
     & Min-Max (Log) & 2 & 0.4447 & 0.27 & C0: 297,145 (46.92\%) \newline C1: 336,134 (53.08\%) \\
     \midrule
-    Weighted (EndComp)
+    Weighted
     & Min-Max (Normal) & 4 & 0.4643 & 0.44 & C0: 135,520 (21.40\%) \newline C1: 262,308 (41.42\%) \newline C2: 95,647 (15.10\%) \newline C3: 139,804 (22.08\%) \\
     \cmidrule{2-6}
     & Min-Max (Log) & 4 & 0.3870 & 0.60 & C0: 109,844 (17.35\%) \newline C1: 279,833 (44.19\%) \newline C2: 109,364 (17.27\%) \newline C3: 134,238 (21.20\%) \\
@@ -561,7 +561,7 @@ Figure~\ref{fig:weight_kmeans_boxplots} shows the unscaled feature distributions
     \makebox[\textwidth][c]{%
         \includegraphics[width=1\textwidth]{Results/EndComp/weight_and_minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}
     }
-    \caption{Unscaled distributions of Feature\_1 through Feature\_5 across the four K-Means clusters produced by the \textbf{Weighted (EndComp) pipeline} (active 633,279 observations, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA). Each feature represents one variable drawn from each of the five core financial domain groups.}
+    \caption{Unscaled distributions of Feature\_1 through Feature\_5 across the four K-Means clusters produced by the \textbf{Weighted pipeline} (active 633,279 observations, 19 features, domain-weighted, MinMaxScaler, non-logarithmic, no PCA). Each feature represents one variable drawn from each of the five core financial domain groups.}
     \label{fig:weight_kmeans_boxplots}
 \end{figure}
 
@@ -776,7 +776,7 @@ By deterministically filtering these known operational extremes, the variance wi
 
 \section{Dimensionality Reduction and Interpretability Trade-offs}
 
-While Principal Component Analysis successfully stabilized the uncurated Naive matrix, detailed in Table \ref{tab:pca_naive_comparison}, acting as an algorithmic safeguard against poor data quality, its application within the optimized pipeline presented a significant business trade-off. In the final EndComp matrix, applying PCA yielded only marginal spatial density improvements while reducing computational overhead, as demonstrated in Table \ref{tab:pca_comparison} and Figure \ref{fig:pca_silhouette_comparison}. However, the resulting principal components obfuscated direct feature interpretation. Because the practical utility of these clusters relies on business stakeholders understanding and acting upon explicit behavioral traits, retaining direct linear interpretability was prioritized over the slight mathematical gains offered by orthogonal compression.
+While Principal Component Analysis successfully stabilized the uncurated Naive case, detailed in Table \ref{tab:pca_naive_comparison}, acting as an algorithmic safeguard against poor data quality, its application within the optimized pipeline presented a significant business trade-off. In the final case, applying PCA yielded only marginal spatial density improvements while reducing computational overhead, as demonstrated in Table \ref{tab:pca_comparison} and Figure \ref{fig:pca_silhouette_comparison}. However, the resulting principal components obfuscated direct feature interpretation. Because the practical utility of these clusters relies on business stakeholders understanding and acting upon explicit behavioral traits, retaining direct linear interpretability was prioritized over the slight mathematical gains offered by orthogonal compression.
 
 Furthermore, applying explicit domain weights proved vital for breaking the dataset's tendency toward binary separation. While the introduction of weights slightly lowered the global Silhouette score, which is a recognized mathematical tradeoff when manipulating feature variance, it successfully fractured the portfolio into a richer, actionable $K=4$ structure as contrasted in Table \ref{tab:weighting_comparison} and Figure \ref{fig:weighting_silhouette}.
 
@@ -840,6 +840,9 @@ Furthermore, this study highlights the necessity of domain-driven feature engine
 Ultimately, this thesis bridges the gap between theoretical cluster optimization and practical financial strategy. The resulting customer archetypes move beyond simple, manual heuristics to capture latent, multivariate transactional habits. Supported by empirical evidence of year-over-year longitudinal stability, this methodology provides a reliable, data-driven foundation for lifecycle portfolio management, targeted customer engagement, and future advancements in dynamic behavioral modeling.
 
 \appendix
+\chapter*{Appendices}
+\addcontentsline{toc}{chapter}{Appendices}
+
 \chapter{Detailed Cluster Profiles}
 \label{app:detailed_cluster_profiles}
 
