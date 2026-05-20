@@ -299,7 +299,7 @@ The results are structured as follows. Section~\ref{sec:results_minmax} evaluate
 
 The three global scaling strategies, MinMaxScaler, StandardScaler, and RobustScaler, were evaluated on the full portfolio of 999,128 observations prior to any heuristic exclusions. Two feature matrices were tested in parallel: the curated \textbf{Normal pipeline} using 16 features, logarithmically transformed, and no PCA, and the uncurated \textbf{Naive pipeline} using 157 features, logarithmically transformed, and no PCA. Both K-Means and K-Medians were evaluated on the Normal pipeline. Only K-Means was applied to the Naive pipeline for computational feasibility. Tables~\ref{tab:scaler_comparison_16_features} and~\ref{tab:scaler_comparison_157_features} report the full results for the Normal and Naive pipelines respectively. Across both feature matrices, MinMaxScaler and StandardScaler produced balanced cluster distributions, whereas RobustScaler produced a near-degenerate partition in both cases, with 99.84\% of observations assigned to a single cluster regardless of the algorithm or feature space applied.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{1.3} 
 \resizebox{\textwidth}{!}{%
@@ -328,7 +328,7 @@ RobustScaler
 \label{tab:scaler_comparison_16_features}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{1.3}
 \resizebox{\textwidth}{!}{%
@@ -350,7 +350,7 @@ RobustScaler   & K-Means & 2 & 0.9752 & 3.23 & C0: 997,501 (99.84\%) \newline C1
 
 Figure~\ref{fig:minmax_vs_std_silscore} contrasts the K-Means Silhouette score trajectories across the full range of evaluated $K$ values for MinMaxScaler and StandardScaler, both generated from the \textbf{Normal pipeline}. MinMaxScaler achieves a stable peak at $K=2$, while StandardScaler produces a lower and more erratic trajectory. Based on these results, MinMaxScaler was selected as the global scaler for all subsequent pipeline configurations.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/std/kmeans_silhouette_score_by_k.png}
@@ -370,7 +370,7 @@ A grid search was conducted to evaluate the effect of feature dimensionality on 
 
 Figure~\ref{fig:grid_search_inertia} shows the K-Means Inertia trajectories for both pipelines across the evaluated range of $K$. The Naive pipeline produces Inertia values several orders of magnitude larger than the Normal pipeline. The corresponding Silhouette score trajectories are shown in Figure~\ref{fig:grid_search_naive_vs_normal}, where the Naive pipeline peaks at a substantially lower score than the Normal pipeline and declines monotonically for larger $K$.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Naive/minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/minmax/kmeans_inertia_objective_by_k.png}
@@ -378,7 +378,7 @@ Figure~\ref{fig:grid_search_inertia} shows the K-Means Inertia trajectories for 
     \label{fig:grid_search_inertia}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Naive/minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Log/Normal/minmax/kmeans_silhouette_score_by_k.png}
@@ -393,7 +393,7 @@ The Improved pipeline introduced deterministic rule-based pre-segmentation appli
 
 Table~\ref{tab:pipeline_summary} contrasts the input populations and K-Means outcomes between the \textbf{Normal pipeline} using the full 999,128 observations, and the \textbf{Improved pipeline} using the active 633,279 observations. Both pipelines converged on $K=2$, with full metric details reported in the table.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lrr}
@@ -403,7 +403,7 @@ Table~\ref{tab:pipeline_summary} contrasts the input populations and K-Means out
         \textbf{Pre-processing} & & \\
         Initial Observations & 999,128 & 999,128 \\
         Initial Features & 29 & 29 \\
-        Features after Correlation Filter and NVZ & 19 & 19 \\
+        Features after Correlation Filter and NZV & 19 & 19 \\
         \midrule
         \textbf{Segmentation \& Eligibility} & & \\
         Group Z (Dormant / Zero User Transactions) & 0 & 337,578 (33.79\%) \\
@@ -424,7 +424,7 @@ Table~\ref{tab:pipeline_summary} contrasts the input populations and K-Means out
 
 Figure~\ref{fig:presegmentation_boxplots} shows the unscaled feature distributions across the resulting K-Means clusters for both pipelines. In the left panel, representing the Normal pipeline with the full 999,128 observations, the interquartile ranges across both clusters are compressed toward zero for the majority of plotted features. In the right panel, detailing the Improved pipeline with 633,279 active observations, following the exclusion of Group Z and Group C, the interquartile ranges expand substantially across both clusters.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.55\textwidth]{Results/Normal/Normal/Normal/minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}%
         \hspace{0.02\textwidth}
@@ -439,7 +439,7 @@ Figure~\ref{fig:presegmentation_boxplots} shows the unscaled feature distributio
 
 PCA was evaluated as an optional reduction step applied to the \textbf{Weighted (EndComp) pipeline}, utilizing 633,279 active observations, 19 features post-filtration, domain-weighting, MinMaxScaler, and no logarithmic transformation. When enabled, PCA compressed the 19-dimensional feature space to 3 principal components. Table~\ref{tab:pca_comparison} reports the K-Means outcomes for both configurations. Both models converged on $K=4$, with the PCA model yielding a marginally higher Silhouette score, a halved convergence time, and a cluster distribution differing from the non-PCA configuration by a maximum of 1.2\% across all clusters.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -469,7 +469,7 @@ PCA was evaluated as an optional reduction step applied to the \textbf{Weighted 
 
 The Silhouette score trajectories for both configurations are shown in Figure~\ref{fig:pca_silhouette_comparison}, with the 19-feature model on the left and the 3-component PCA model on the right.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_pca_and_minmax/kmeans_silhouette_score_by_k.png}
@@ -482,7 +482,7 @@ The Silhouette score trajectories for both configurations are shown in Figure~\r
 
 For comparative context, PCA was also applied to the uncurated \textbf{Naive pipeline} operating on the full 999,128 observations with MinMaxScaler and no domain weighting. Table~\ref{tab:pca_naive_comparison} reports results across two transformation variants. In the non-logarithmic variant, PCA compressed 220 features to 9 principal components, altered the optimal partition from $K=2$ to $K=3$, and reduced convergence time from 9.64 seconds to 0.40 seconds. In the logarithmic variant, PCA compressed 157 features to 42 principal components with negligible change to the optimal $K$, Silhouette score, or cluster distribution.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -522,7 +522,7 @@ The impact of the custom domain weighting function was isolated by comparing two
 
 Table~\ref{tab:weighting_comparison} reports K-Means outcomes for both pipelines under non-logarithmic and logarithmic transformation variants. The unweighted pipeline converged on $K=2$ under both variants, while the weighted pipeline converged on $K=4$ under both variants.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -548,7 +548,7 @@ Table~\ref{tab:weighting_comparison} reports K-Means outcomes for both pipelines
 
 This divergence is clearly visualized in Figure~\ref{fig:weighting_silhouette}, where the unweighted Silhouette trajectory in the left panel peaks at $K=2$ and the weighted trajectory in the right panel peaks distinctly at $K=4$. Both trajectories are generated from the non-logarithmic configuration.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Normal/Improved/minmax/kmeans_silhouette_score_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
@@ -558,7 +558,7 @@ This divergence is clearly visualized in Figure~\ref{fig:weighting_silhouette}, 
 
 Figure~\ref{fig:weight_kmeans_boxplots} shows the unscaled feature distributions across the four clusters produced by the weighted pipeline. Five features are plotted, Feature\_1 through Feature\_5, each representing one variable drawn from each of the five core financial domain groups retained in the model.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \makebox[\textwidth][c]{%
         \includegraphics[width=1\textwidth]{Results/EndComp/weight_and_minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}
     }
@@ -580,7 +580,7 @@ Table~\ref{tab:kmeans_vs_kmedians_comparison} details the outcomes of K-Means an
 
 On the Optimized pipeline, K-Means converged on a $K=4$ structure while K-Medians settled on $K=2$. On the Naive pipeline, the algorithms converged on $K=2$ and $K=3$ respectively, with K-Medians identifying an additional partition that K-Means did not resolve. Full metric details are reported in Table~\ref{tab:kmeans_vs_kmedians_comparison}.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -606,7 +606,7 @@ On the Optimized pipeline, K-Means converged on a $K=4$ structure while K-Median
 
 Figure~\ref{fig:kmeans_vs_kmedians_metrics} shows the Inertia and Silhouette score trajectories for K-Means and K-Medians on the \textbf{Optimized Weighted pipeline}. The K-Means Inertia trajectory exhibits a pronounced geometric inflection at $K=4$, with the Silhouette score peaking at the same $K$. The K-Medians Inertia trajectory does not exhibit a comparable inflection point, with the Silhouette score peaking at $K=2$.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmedians_inertia_objective_by_k.png}
@@ -619,7 +619,7 @@ Figure~\ref{fig:kmeans_vs_kmedians_metrics} shows the Inertia and Silhouette sco
 
 Figure~\ref{fig:naive_kmeans_vs_kmedians_metrics} shows the equivalent trajectories for the \textbf{Uncurated Naive pipeline}. On this pipeline, K-Medians resolves a $K=3$ structure while K-Means resolves only a $K=2$ partition under the same configuration.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/Normal/Normal/Naive/minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/Normal/Normal/Naive/minmax/kmedians_inertia_objective_by_k.png}
@@ -643,7 +643,7 @@ Standard K-Means was compared against Mini-Batch K-Means across three dimensiona
 
 Full results are reported in Table~\ref{tab:kmeans_vs_mbkmeans_comparison}. On the Optimized 19-feature space, standard K-Means converged faster and on a more stable $K=4$ partition, while Mini-Batch produced a more fractured $K=5$ configuration. On the PCA-reduced space, both algorithms converged on $K=4$ with near-identical cluster distributions. On the uncurated 220-feature space, Mini-Batch reduced convergence time from 9.64 to 4.54 seconds and resolved a $K=4$ structure where standard K-Means produced only $K=2$.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -687,7 +687,7 @@ The Silhouette score trajectories for standard K-Means and Mini-Batch K-Means on
 
 The definitive pipeline, utilizing standard K-Means, 19 features, domain-weighting, MinMaxScaler, and no PCA on the active 633,279 observations, produced the optimal $K=4$ partition. Figure~\ref{fig:final_kmeans_metrics} shows the global Inertia and Silhouette score trajectories confirming this optimum, with a pronounced elbow in the Inertia curve and a peak Silhouette score both occurring at $K=4$.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_inertia_objective_by_k.png}
     \includegraphics[width=0.45\textwidth]{Results/EndComp/weight_and_minmax/kmeans_silhouette_score_by_k.png}
@@ -697,7 +697,7 @@ The definitive pipeline, utilizing standard K-Means, 19 features, domain-weighti
 
 The four cluster assignments, together with the two heuristic pre-segmentation groups, were mapped back to the full 999,128 observations. Table~\ref{tab:final_cluster_distribution} reports the resulting population distribution across all six segments.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \resizebox{\textwidth}{!}{%
@@ -725,7 +725,7 @@ The four cluster assignments, together with the two heuristic pre-segmentation g
 
 Figure~\ref{fig:archetype_boxplots} plots the distributions of Feature\_1 through Feature\_5 for each of the four active clusters, mapped back to the original unscaled feature space and obfuscated. Each feature represents one variable drawn from each of the five core financial domain groups.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.9\textwidth]{Results/EndComp/weight_and_minmax/kmeans_reference_vs_cluster_boxplots_obfuscated.png}
     }
@@ -735,7 +735,7 @@ Figure~\ref{fig:archetype_boxplots} plots the distributions of Feature\_1 throug
 
 Figure~\ref{fig:kmeans_0_detailed} provides granular sub-feature profiling for KMEANS\_0, showing the unscaled distributions of all sub-features within each of the five core financial domain groups for accounts assigned to that cluster. Equivalent profiling for KMEANS\_1 through KMEANS\_3 is provided in Appendix~\ref{app:detailed_cluster_profiles}.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_0_detailed_analysis_obfuscated.png}
     \caption{Granular sub-feature profiling for KMEANS\_0 across all five core financial domain groups, plotted on the original unscaled data. Equivalent profiles for KMEANS\_1 through KMEANS\_3 are provided in Appendix~\ref{app:detailed_cluster_profiles}.}
@@ -749,12 +749,14 @@ A temporal analysis was conducted on the subset of accounts with observations in
 
 Figure~\ref{fig:kmeans_transition} presents the resulting row-normalized transition probability matrix. Each row represents the cluster assignment in 2024 and each column the assignment in 2025, with cell values indicating the proportion of accounts in each origin segment that transitioned to or remained within each destination segment over the observed period.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{Results/EndComp/weight_and_minmax/kmeans_transition.png}
     \caption{Row-normalized transition probability matrix for the active K-Means clusters and heuristic groups, tracking cluster assignments from 2024 to 2025 under the definitive pipeline.}
     \label{fig:kmeans_transition}
 \end{figure}
+
+\newEmptyPage
 
 \chapter{Discussion}
 \label{chap:Discussion}
@@ -843,13 +845,13 @@ Beyond optimization loops, the baseline can be further challenged by varying the
 \chapter{Conclusion}
 \label{chap:Conclusion}
 
-The modern retail banking landscape requires robust, scalable methodologies to distill vast, high-dimensional transactional data into actionable customer insights. This thesis successfully designed, evaluated, and implemented an end-to-end unsupervised machine learning pipeline capable of translating complex credit card portfolio data into distinct, economically meaningful customer archetypes.
+The modern retail banking landscape requires robust, scalable methodologies to distill vast, high-dimensional transactional data into actionable customer insights. This thesis successfully designed, evaluated, and implemented an end-to-end unsupervised machine learning pipeline capable of translating complex credit card portfolio data into distinct, economically meaningful customer archetypes. 
 
-By systematically evaluating the mathematical behaviors of distance-based clustering algorithms against the physical realities of financial data, this research demonstrates that algorithmic segmentation cannot rely on raw computational power alone. Instead, success requires a highly curated hybrid approach. The empirical findings establish that deterministic heuristic pre-segmentation is structurally vital. By isolating operational extremes, such as dormant accounts, the algorithms are prevented from collapsing into trivial density traps, allowing them to optimize for genuine behavioral variance within the active portfolio.
+By systematically deploying our architecture across three experimental pipeline configurations—the data-agnostic Naive Baseline, the domain-curated Normal Case, and the optimized Improved Case—this research demonstrates that algorithmic segmentation cannot rely on raw computational power alone. Instead, analytical success requires a highly curated hybrid framework. The empirical findings establish that deterministic heuristic pre-segmentation is structurally vital. By isolating operational extremes, such as the massive dormant sub-population (Group Z, representing 33.79\% of the portfolio), the primary partitioning models are prevented from collapsing into trivial density divides, allowing them to optimize exclusively for genuine behavioral variance within the active majority.
 
-Furthermore, this study highlights the necessity of domain-driven feature engineering and rigid spatial boundaries over data-agnostic dimensionality reduction. The selection of MinMaxScaler preserved the intrinsic, zero-bounded proportional geometries of financial features, while strategic domain weighting ensured that core transactional behaviors were evaluated evenly. Under these optimized conditions, standard $K$-means clustering emerged as the most efficient and effective algorithm, successfully partitioning the active portfolio into four distinct, highly stable customer segments.
+Furthermore, this study highlights the mathematical necessity of domain-driven feature engineering and rigid spatial boundaries over data-agnostic dimensionality reduction. Bounding our feature representations via MinMaxScaler effectively preserved the intrinsic, zero-bounded proportional geometries of financial variables, whereas RobustScaler led to near-degenerate partitions. Concurrently, implementing our custom domain-weighting function proved critical to fracturing primitive, binary spatial groupings into a richer, actionable four-cluster structure ($K=4$). Under these optimized conditions, standard $K$-means clustering emerged as the most efficient and robust partition engine, generating cohesive sub-populations while operating near-instantaneously compared to the high computational overhead of $K$-medians. 
 
-Ultimately, this thesis bridges the gap between theoretical cluster optimization and practical financial strategy. The resulting customer archetypes move beyond simple, manual heuristics to capture latent, multivariate transactional habits. Supported by empirical evidence of year-over-year longitudinal stability, this methodology provides a reliable, data-driven foundation for lifecycle portfolio management, targeted customer engagement, and future advancements in dynamic behavioral modeling.
+Ultimately, this thesis bridges the gap between theoretical cluster optimization and practical financial strategy. The resulting customer archetypes move beyond simple, manual heuristics to capture latent, multivariate transactional habits. Supported by empirical evidence of year-over-year longitudinal stability exceeding 50\% retention, this methodology provides Avarda Bank AB with a reliable, data-driven foundation for lifecycle portfolio management, targeted customer engagement, and future advancements in dynamic behavioral modeling.
 
 \appendix
 \chapter*{Appendices}
@@ -860,21 +862,21 @@ Ultimately, this thesis bridges the gap between theoretical cluster optimization
 
 This appendix provides the extended sub-feature profiling for the remaining active K-Means clusters (KMEANS\_1, KMEANS\_2, and KMEANS\_3). Each figure illustrates the unscaled distributions of all sub-features within each of the five core financial domain groups for the accounts assigned to the respective cluster.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_1_detailed_analysis_obfuscated.png}
     \caption{Granular sub-feature profiling for KMEANS\_1 across all five core financial domain groups, plotted on the original unscaled data.}
     \label{fig:kmeans_1_detailed}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_2_detailed_analysis_obfuscated.png}
     \caption{Granular sub-feature profiling for KMEANS\_2 across all five core financial domain groups, plotted on the original unscaled data.}
     \label{fig:kmeans_2_detailed}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{Results/EndComp/weight_and_minmax/KMEANS_3_detailed_analysis_obfuscated.png}
     \caption{Granular sub-feature profiling for KMEANS\_3 across all five core financial domain groups, plotted on the original unscaled data.}
