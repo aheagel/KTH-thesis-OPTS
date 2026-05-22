@@ -10,9 +10,10 @@
     However, much of this segmentation currently depends on manually defined rules and heuristics, which are typically formulated through an analyst's extensive, hands-on experience with the data.
     However, this manual approach is inherently unscalable. As data volumes grow and the dimensionality of available features increases, human-driven analysis can only accommodate an ever-decreasing fraction of the true complexity within the customer base.
     To overcome these limitations, unsupervised machine learning offers a promising, data-driven alternative.
+    
     The objective of applying this methodology is not merely to search for hidden anomalies, but first and foremost to demonstrate that algorithmic approaches can reliably identify and group standard, expected behavioral patterns.
     By successfully capturing this foundational business logic as a baseline, the method can then be further leveraged to uncover complex, latent customer segments derived from highly nuanced account behavior.
-    Ultimately, this research aims to show how hybrid techniques, combining deterministic heuristic filtering with scalable machine learning, can provide a comprehensive segmentation strategy free from rigid, predefined assumptions.
+    Ultimately, this research aims to show if hybrid techniques, combining deterministic heuristic filtering with scalable machine learning, can provide a comprehensive segmentation strategy free from rigid, predefined assumptions.
     
     \section{Problem statement}
     Despite the availability of comprehensive transactional and profitability data, translating these raw operational databases into cohesive customer segments presents a significant engineering and analytical challenge.
@@ -31,19 +32,14 @@
         \item \textbf{Profile financial and behavioral characteristics:} Interpret the resulting clusters by analyzing their defining features, such as spending behavior across different categories.
     \end{enumerate}
     
-    \section{Scope and limitations}
+\section{Scope and limitations}
     \label{sec:limitations}
     The scope of this research is defined by a targeted sample of approximately 500,000 unique credit card agreements across the years 2024 and 2025, yielding a longitudinal dataset of 999,128 annual observations.
-    A primary limitation of this study is the inherent nature of unsupervised learning;
-    because the data lacks ground-truth customer labels, validation relies on internal mathematical heuristics rather than predictive accuracy \cite{naeem_unsupervised_2023}.
-    Additionally, by aggregating to an annual level, seasonality and short-term behavioral shifts may be smoothed over or obscured.
-    Finally, to comply with strict contractual obligations safeguarding proprietary company information, all dataset attributes have been deliberately obfuscated.
-    Beyond data-specific constraints, the algorithmic scope of this thesis was deliberately restricted to partitioning models characterized by strong global consensus and linear explainability, such as $K$-means and $K$-medians.
-    Given that this research represents a primary, exploratory entry into automated portfolio analysis, establishing a transparent, highly interpretable baseline was prioritized over the deployment of complex, non-linear architectures.
-    In a retail banking ecosystem, final customer segmentations must ultimately be delivered to corporate boards and non-technical stakeholders who require explicit, deterministic rules to authorize capital allocation and product campaigns.
-    Highly complex model topologies often yield probabilistic or arbitrary cluster boundaries that obscure business intuition.
-    Furthermore, prioritizing geometrically straightforward models allowed for a more wise allocation of the computational budget.
-    Rather than consuming resource overhead on the iterative estimation of highly sensitive, multi-parameter probability densities, computational power was strategically redirected toward executing extensive hyperparameter grid searches, robust domain-specific feature weighting, and alternative scaling evaluations across the entire active dataset.
+
+    A primary limitation of this study is the inherent nature of unsupervised learning; because the data lacks ground-truth customer labels, validation relies on internal mathematical heuristics rather than predictive accuracy \cite{naeem_unsupervised_2023}. Additionally, by aggregating to an annual level, seasonality and short-term behavioral shifts may be smoothed over or obscured. Finally, to comply with strict contractual obligations safeguarding proprietary company information, all dataset attributes have been deliberately obfuscated.
+
+    Beyond data-specific constraints, the algorithmic scope of this thesis was deliberately restricted to partitioning models characterized by strong global consensus and linear explainability, such as $K$-means and $K$-medians. Given that this research represents a primary, exploratory entry into automated portfolio analysis, establishing a transparent, highly interpretable baseline was prioritized over the deployment of complex, non-linear architectures. In a retail banking ecosystem, final customer segmentations must ultimately be delivered to corporate boards and non-technical stakeholders who require explicit, deterministic rules to authorize capital allocation and product campaigns. Highly complex model topologies often yield probabilistic or arbitrary cluster boundaries that obscure business intuition. Furthermore, prioritizing geometrically straightforward models allowed for a more wise allocation of the computational budget. Rather than consuming resource overhead on the iterative estimation of highly sensitive, multi-parameter probability densities, computational power was strategically redirected toward executing extensive hyperparameter grid searches, robust domain-specific feature weighting, and alternative scaling evaluations across the entire active dataset.
+    
     \newEmptyPage\
 
 \chapter{Background}
@@ -55,7 +51,7 @@ Subsequently, it details the mathematical principles behind unsupervised machine
     \section{Customer segmentation in retail banking}
     \label{sec:banking_segmentation}
     In the financial services sector, credit card portfolios represent a complex ecosystem of customer behaviors, borrowing habits, and repayment patterns.
-    Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the RFM model to assess risk and profitability.
+    Traditionally, institutions segmented these portfolios by applying manually defined rules to frameworks like the Recency, Frequency and Monetary (RFM) model to assess risk and profitability.
     In a retail banking context, this framework evaluates three core dimensions of account activity.
     \textit{Recency} measures the time elapsed since a customer's last transaction, indicating their current engagement level.
     \textit{Frequency} captures the total volume of transactions within a specific period, serving as a proxy for card reliance.
@@ -177,12 +173,13 @@ Subsequently, it details the mathematical principles behind unsupervised machine
         
     \section{Dimensionality reduction}
     \label{sec:dimensionality_reduction}
+    To extract meaningful consumer behavioral archetypes from nearly one million longitudinal credit card observations, the underlying feature space must be both computationally manageable and geometrically informative. High-dimensional financial datasets frequently exhibit extreme multicollinearity and sparse data distributions, which can severely distort the distance metrics relied upon by centroid-based partitioning models. To address these architectural challenges, this section explores two distinct paradigms of dimensionality reduction: Principal Component Analysis (PCA), a linear technique focused on global variance maximization, and Uniform Manifold Approximation and Projection (UMAP), a non-linear approach rooted in algebraic topology. Evaluating these methods establishes the mathematical framework necessary to optimize data density before executing the core clustering pipelines.
     
         \subsection{Principal component analysis}
         \label{subsec:pca}
         While partitioning algorithms like $K$-means group observations into distinct clusters, financial datasets are frequently characterized by high dimensionality.
         As the number of features $d$ increases, the concept of distance becomes inherently less discriminative, representing a mathematical phenomenon widely known as the curse of dimensionality.
-        To mitigate this, Principal Component Analysis, or PCA, is often employed as a preliminary unsupervised learning step to reduce the feature space while preserving the maximum possible variance of the original dataset \cite{naeem_unsupervised_2023}.
+        To mitigate this, PCA, is often employed as a preliminary unsupervised learning step to reduce the feature space while preserving the maximum possible variance of the original dataset \cite{naeem_unsupervised_2023}.
         PCA seeks an orthogonal linear transformation that projects the data into a new $k$-dimensional subspace, where $k < d$, maximizing the variance of the projected data.
         The spatial relationships between the features are captured by the $d \times d$ sample covariance matrix.
         Solving the algebraic eigenvalue problem for the covariance matrix identifies eigenvectors, which dictate the direction of the principal axes, and eigenvalues, which quantify the magnitude of the dataset's variance explained along that specific axis.
@@ -194,7 +191,7 @@ Subsequently, it details the mathematical principles behind unsupervised machine
         \label{subsec:umap}
         While PCA provides an efficient mechanism for capturing the global variance and linear relationships within a dataset, it inherently struggles to resolve complex, non-linear patterns.
         In high-dimensional financial datasets, data points frequently lie on complex manifolds that linear projections simply flatten.
-        To address this limitation, non-linear dimensionality reduction techniques like Uniform Manifold Approximation and Projection, or UMAP, are often considered \cite{mcinnes_umap_2020}.
+        To address this limitation, non-linear dimensionality reduction techniques like UMAP, are often considered \cite{mcinnes_umap_2020}.
         UMAP is a modern manifold learning technique grounded in Riemannian geometry and algebraic topology.
         Unlike PCA, UMAP operates by constructing a high-dimensional fuzzy topological representation of the data and subsequently optimizing a low-dimensional graph to be as structurally similar as possible.
         This optimization is achieved by minimizing the fuzzy set cross-entropy $C$ between the high-dimensional and low-dimensional graph weights.
@@ -205,7 +202,7 @@ Subsequently, it details the mathematical principles behind unsupervised machine
     \label{sec:descent_optimization}
     To understand the mechanics of large-scale clustering, it is necessary to first establish the general principles of iterative descent optimization.
     In applied machine learning, optimization problems frequently require minimizing a differentiable scalar cost function.
-    When analytical solutions are computationally intractable, iterative methods such as Gradient Descent are employed to update parameters by taking steps in the direction of the negative gradient.
+    When analytical solutions are computationally intractable, iterative methods such as gradient descent are employed to update parameters by taking steps in the direction of the negative gradient.
     Evaluating the full gradient at every iteration is computationally prohibitive for massive datasets where $n \gg 1$.
     Stochastic gradient methods bypass this bottleneck by approximating the true gradient using a small, randomly sampled subset of the data known as a mini-batch.
     Because the mini-batch gradient is an unbiased estimator of the true gradient, the algorithm descends the cost surface in expectation.
@@ -292,15 +289,14 @@ Subsequently, it details the mathematical principles behind unsupervised machine
     This requires discovering an optimal mapping function that translates their disparate, arbitrary labels into a unified space \cite{sieranoja_clustering_2024}.
     Without establishing this alignment, computing the true discrepancy between the algorithms' outputs is mathematically impossible.
     Formally, to compare the structural agreement between the methods, the absolute discrepancy between their aligned sets is directly quantified.
-    The Minimum Label Differences are defined as:
+    The minimum label differences are defined as:
     \begin{equation}
         \text{Differences} = N - \sum_{i=1}^{N} \delta(g_i, \text{map}(a_i))
     \end{equation}
     where $N$ is the total number of data points, $g_i$ is the reference label derived from the baseline method or ground truth, $a_i$ is the predicted cluster label from the method being evaluated, $\delta$ is the Kronecker delta which yields $1$ if the labels match and $0$ otherwise, and $\text{map}(\cdot)$ is the optimal mapping function \cite{sieranoja_clustering_2024}.
     Because a dataset with $k$ clusters possesses $k!$ possible mapping permutations, finding the optimal $\text{map}(\cdot)$ is computationally framed as a linear assignment problem.
-    By constructing a contingency matrix that quantifies the overlap between the methods' cluster assignments, the Kuhn-Munkres, or Hungarian, algorithm is utilized to deterministically isolate the 1-to-1 label pairing that minimizes the total label differences.
+    By constructing a contingency matrix that quantifies the overlap between the methods' cluster assignments, the Kuhn-Munkres, or Hungarian, algorithm is utilized to deterministically isolate the one-to-one label pairing that minimizes the total label differences.
     This ensures that any remaining differences represent genuine structural disagreements between the clustering algorithms, rather than mere variations in their arbitrary naming conventions.
-    \newEmptyPage\
 
 \chapter{Methodology}
 \label{chap:Methodology}
@@ -309,11 +305,11 @@ This chapter outlines the data pipeline and machine learning workflow developed 
 
     \section{Data acquisition and structure}
     \label{sec:data_acquisition}
-    The dataset consists of annual-level data containing approximately one million observations across the years 2024 and 2025. Each observation represents a specific credit card agreement at a single cross-section in time, characterized by over 580 raw features. To maintain a consistent unit of analysis, individual records are tracked using a multi-index comprising the customer agreement ID and the data year of aggregation. 
+    The dataset consists of annual-level data containing approximately a million observations across the years 2024 and 2025. Each observation represents a specific credit card agreement at a single cross-section in time, characterized by over 580 raw features. To maintain a consistent unit of analysis, individual records are tracked using a multi-index comprising the customer agreement ID and the data year of aggregation. 
     
-    This baseline temporal and spatial data structure was selected based on two primary methodological rationales. First, utilizing an annual aggregation window helps smooth out temporary fluctuations. Because transactional data contains high short-term variance and noise driven by seasonal factors—such as holiday shopping periods or vacation spending—aggregating the raw transactional logs into annual snapshots isolates stable lifestyle habits and macro-level behavior rather than short-lived variations in spending velocity. 
+    This baseline temporal and spatial data structure was selected based on two primary methodological rationales. Utilizing an annual aggregation window helps smooth out temporary fluctuations. Because transactional data contains high short-term variance and noise driven by seasonal factors, such as holiday shopping periods or vacation spending, aggregating the raw transactional logs into annual snapshots isolates stable lifestyle habits and macro-level behavior rather than short-lived variations in spending velocity. 
     
-    Second, treating the annual snapshots independently addresses the non-stationary nature of financial behavior. A customer's financial context, risk profile, and card utilization can change significantly from 2024 to 2025 due to shifts in income, employment, or credit needs. Bounding the data points strictly by year and treating them as independent observations allows the model to capture these distinct behavioral states accurately. This setup prevents historical habits from obscuring new behavioral trends, and it establishes the necessary foundation for the longitudinal transition analysis presented in the results.
+    Furthermore, treating the annual snapshots independently addresses the non-stationary nature of financial behavior. A customer's financial context, risk profile, and card utilization can change significantly from 2024 to 2025 due to shifts in income, employment, or credit needs. Bounding the data points strictly by year and treating them as independent observations allows the model to capture these distinct behavioral states accurately. This setup prevents historical habits from obscuring new behavioral trends, and it establishes the necessary foundation for the longitudinal transition analysis presented in the results.
     
     \section{Data preprocessing and heuristic exclusions}
     \label{sec:preprocessing}
@@ -338,7 +334,7 @@ This chapter outlines the data pipeline and machine learning workflow developed 
 
         \subsection{Logarithmic transformation}
         \label{subsec:log_transform}
-        An experimental logarithmic transformation, \texttt{log1p}, is investigated as an optional preprocessing step to handle the extreme positive skewness typical of financial data. When enabled, this transformation is exclusively applied to aggregated transactional sum data, leaving other metric types such as counts, limits, and percentages in their original scale. This selective application is mathematically necessary due to the structural differences between feature types. Financial volumes span multiple orders of magnitude and are heavily right-skewed, meaning a small percentage of extreme accounts controls most of the variance. The logarithmic transformation compresses this long tail to prevent outliers from dominating distance calculations. Conversely, indicators such as transaction counts, risk limits, and utilization ratios are naturally bounded or structurally constrained. Applying a logarithmic transformation to these metrics would compress meaningful linear differences, making it harder for distance-based models to detect distinct variations in account behavior. Crucially, because this logarithmic transformation fundamentally alters the variance and the linear relationships between variables, its application directly impacts all subsequent filtration steps. Consequently, toggling this transformation dynamically changes the final feature space across all tested models.
+        An experimental logarithmic transformation, is investigated as an optional preprocessing step to handle the extreme positive skewness typical of financial data. When enabled, this transformation is exclusively applied to aggregated transactional sum data, leaving other metric types such as counts, limits, and percentages in their original scale. This selective application is mathematically necessary due to the structural differences between feature types. Financial volumes span multiple orders of magnitude and are heavily right-skewed, meaning a small percentage of extreme accounts controls most of the variance. The logarithmic transformation compresses this long tail to prevent outliers from dominating distance calculations. Conversely, indicators such as transaction counts, risk limits, and utilization ratios are naturally bounded or structurally constrained. Applying a logarithmic transformation to these metrics would compress meaningful linear differences, making it harder for distance-based models to detect distinct variations in account behavior. Crucially, because this logarithmic transformation fundamentally alters the variance and the linear relationships between variables, its application directly impacts all subsequent filtration steps. Consequently, toggling this transformation dynamically changes the final feature space across all tested models.
         
         \subsection{Algorithmic filtration}
         \label{subsec:nzv_filtering_method}
@@ -360,7 +356,7 @@ This chapter outlines the data pipeline and machine learning workflow developed 
         \label{subsec:FeatureWeigting}
         While explicit feature weighting was considered to balance the influence of distinct financial categories, it introduces significant complexity when implemented dynamically at scale.
         Consequently, targeted feature weighting is treated as an optional parameter, specifically utilized within the domain-driven experimental configurations representing the normal and improved cases.
-        In these cases, five core financial domains were identified as holding equal theoretical importance: incoming payments, interest capitalization, credit limits, utilization rates, and financial or cash-like transactions.
+        In these cases, five core financial domains were identified as holding equal theoretical importance: incoming payments, interest capitalization, credit limits, utilization rates, and a specific transactions category.
         However, because the algorithmic filtration processes, such as the correlation and NZV filters, prune the number of aggregated sub-features unevenly across these categories, standard scaling would disproportionately favor domains that retained a higher volume of sub-features.
         To rectify this, a custom weighting function is applied immediately prior to dimensionality reduction.
         The total feature weight is distributed such that each of the five core domains contributes exactly 20\% of the aggregate weight.
@@ -369,13 +365,13 @@ This chapter outlines the data pipeline and machine learning workflow developed 
         
     \section{Dimensionality reduction}
     \label{sec:dimensionality_reduction}
-    Given the scale of the dataset, dimensionality reduction techniques were evaluated to compress the feature space and improve algorithmic efficiency prior to spatial clustering.
+    Given the scale of the dataset, dimensionality reduction techniques were evaluated to compress the feature space and improve algorithmic efficiency prior to centroid-based clustering.
     
         \subsection{Principal component analysis}
         \label{subsec:pca}
         PCA is incorporated into the pipeline as an optional experimental variable rather than a default preprocessing step. The methodology systematically investigates and compares clustering outcomes both with and without PCA to objectively assess its necessity. When enabled, PCA projects the filtered features into a lower-dimensional orthogonal space while retaining a target cumulative variance, which helps mitigate the curse of dimensionality and accelerates optimization. However, this orthogonal transformation shifts the data into abstract principal components that represent linear combinations of the original variables, thereby obscuring direct feature interpretation. Because the final customer segments must eventually be delivered to non-technical business stakeholders who require explicit, deterministic rules for product campaigns and capital allocation, retaining direct linear interpretability is an operational priority. Treating PCA as an optional parameter allows the pipeline to empirically evaluate whether the mathematical improvements in spatial density and convergence speed justify the loss of direct behavioral explanation.
         
-        \subsection{Alternative methods: manifold learning}
+        \subsection{Alternative methods: Uniform manifold approximation and projection}
         \label{subsec:manifold}
         Alternative non-linear dimensionality reduction techniques were also considered during the development of the pipeline, specifically UMAP. UMAP is effective at capturing complex, non-linear patterns and preserving both local and global geometric relationships within datasets. However, preliminary testing revealed that constructing the high-dimensional fuzzy topological graphs required by UMAP was too computationally intensive for a dense matrix containing nearly one million annual observations, leading to processing bottlenecks. Utilizing UMAP within the primary workflow would have necessitated aggressive random down-sampling of the dataset. Because a primary objective of this thesis is to execute a full-population analysis on the active credit card base without data loss or sampling bias, UMAP was excluded from the final quantitative pipeline in favor of more scalable partitioning configurations.
         
@@ -434,7 +430,7 @@ This chapter outlines the data pipeline and machine learning workflow developed 
 \label{chap:Results}
 
 This chapter presents the empirical findings of the unsupervised machine learning pipeline.
-All results are derived from the initial dataset of 999,128 annual observations spanning 2024 and 2025, each indexed by a unique \texttt{Agreement\_ID} and \texttt{Year} pair.
+All results are derived from the initial dataset of 999,128 annual observations spanning 2024 and 2025, each indexed by a unique agreement ID and aggregation year pair.
 Every figure and table in this chapter explicitly identifies the corresponding pipeline configuration, including the feature engineering approach, the population subset, the applied scaler, whether a logarithmic transformation was applied, and whether PCA was used.
 The results are structured as follows. Section~\ref{sec:results_minmax} evaluates the three scaling strategies on cluster geometry.
 Section~\ref{sec:results_grid_search} compares the naive and normal feature engineering pipelines. Section~\ref{sec:results_presegmentation} reports the structural effect of heuristic pre-segmentation.
@@ -803,7 +799,7 @@ Standard $K$-means was compared against mini-batch $K$-means across three dimens
     \item \textbf{Uncurated:} Full 999,128 observations, 220 features, no domain weights, no PCA.
 \end{enumerate}
 
-Full results are reported in Table~\ref{tab:kmeans_vs_mbkmeans_comparison}. On the Optimized 19-feature space, standard $K$-means converged faster and on a more stable $K=4$ partition, while mini-batch produced a more fractured $K=5$ configuration.
+Full results are reported in Table~\ref{tab:kmeans_vs_mbkmeans_comparison}. On the optimized 19-feature space, standard $K$-means converged faster and on a more stable $K=4$ partition, while mini-batch produced a more fractured $K=5$ configuration.
 On the PCA-reduced space, both algorithms converged on $K=4$ with near-identical cluster distributions.
 On the uncurated 220-feature space, mini-batch reduced convergence time from 9.64 to 4.54 seconds and resolved a $K=4$ structure where standard $K$-means produced only $K=2$.
 \begin{table}[H]
@@ -925,21 +921,13 @@ This chapter synthesizes the empirical findings detailed in Chapter~\ref{chap:Re
 By analyzing algorithmic behaviors against the realities of a retail banking portfolio, this section explores the structural necessity of the pipeline's preprocessing choices, the trade-offs in dimensionality reduction, and the economic implications of the resulting customer archetypes.
 \section{The structural necessity of preprocessing constraints}
 
-The evaluation of scaling methodologies confirmed that the intrinsic geometry of financial data requires rigid spatial boundaries.
-While both min-max and standard scaling produced viable cluster distributions, min-max scaling was deliberately selected as the definitive global scaler due to its specific handling of absolute limits and domain characteristics.
-In credit card portfolios, many core features inherently share base units, such as absolute monetary values or frequency metrics.
-A defining characteristic of this data is its strict lower bound. An account cannot have negative transactions or negative spend.
-min-max scaling explicitly preserves this physical reality. By binding the data to a strict $[0, 1]$ interval, an original value of zero maps perfectly to a scaled value of zero.
-Conversely, standard scaling normalize features by centering them around a mean of zero.
-Applying this to heavily right-skewed financial data artificially shifts genuine zero-activity metrics into negative vector space.
-This shift mathematically destroys the data's natural sparsity and distorts the proportional distance between a dormant behavior and an active one.
-Because the features share similar physical interpretations, bounding them to a proportional $[0, 1]$ span ensures they are evaluated on an equal playing field without violating their natural lower limits.
-The empirical results support this theoretical preference; min-max scaling achieved a higher and more stable peak silhouette score compared to standard scaling, confirming its superior preservation of cluster cohesion.
-Finally, while theoretical arguments can be made for robust scaling in heavy-tailed data, its application to this specific domain resulted in severely skewed $L_2$ norm distances.
-As shown in Table~\ref{tab:scaler_comparison_157_features}, it allowed unbounded transaction sums to disproportionately dominate the spatial topography, collapsing the portfolio into a near-degenerate single cluster.
-Similarly, the profound divergence between the uncurated naive baseline and the domain-driven normal approach highlights the curse of dimensionality in unsupervised learning.
-The bloated, 157-dimensional naive space mathematically diluted the distance metrics.
-By utilizing rigorous business-logic curation to reduce the feature space to 16 variables, the distance-based algorithms were able to evaluate core behaviors without being blinded by multicollinear noise.
+The evaluation of scaling methodologies confirmed that the intrinsic geometry of financial data requires rigid spatial boundaries. While both min-max and standard scaling produced viable cluster distributions, min-max scaling was deliberately selected as the definitive global scaler due to its specific handling of absolute limits and domain characteristics. In credit card portfolios, many core features inherently share base units, such as absolute monetary values or frequency metrics.
+
+A defining characteristic of this data is its strict lower bound; an account cannot have negative transactions or negative spend. Min-max scaling explicitly preserves this physical reality. By binding the data to a strict $[0, 1]$ interval, an original value of zero maps perfectly to a scaled value of zero. Conversely, standard scaling normalizes features by centering them around a mean of zero. Applying this to heavily right-skewed financial data artificially shifts genuine zero-activity metrics into negative vector space, which mathematically destroys the data's natural sparsity and distorts the proportional distance between a dormant behavior and an active one. Because the features share similar physical interpretations, bounding them to a proportional $[0, 1]$ span ensures they are evaluated on an equal playing field without violating their natural lower limits.
+
+The empirical results support this theoretical preference; min-max scaling achieved a higher and more stable peak silhouette score compared to standard scaling, confirming its superior preservation of cluster cohesion. Finally, while theoretical arguments can be made for robust scaling in heavy-tailed data, its application to this specific domain resulted in severely skewed $L_2$ norm distances. As shown in Table~\ref{tab:scaler_comparison_157_features}, it allowed unbounded transaction sums to disproportionately dominate the spatial topography, collapsing the portfolio into a near-degenerate single cluster.
+
+Similarly, the profound divergence between the uncurated naive baseline and the domain-driven normal approach highlights the curse of dimensionality in unsupervised learning. The bloated, 157-dimensional naive space mathematically diluted the distance metrics. By utilizing rigorous business-logic curation to reduce the feature space to 16 variables, the distance-based algorithms were able to evaluate core behaviors without being blinded by multicollinear noise. 
 
 \section{Addressing operational extremes via pre-segmentation}
 
@@ -1034,7 +1022,7 @@ To prioritize explicit business interpretability, linear efficiency, and computa
 While this linear approach is highly effective as an initial, explainable clustering strategy, high-dimensional financial data frequently lies on complex, non-linear manifolds.
 Future methodologies should investigate the utilization of UMAP.
 Although running UMAP on the full population was computationally prohibitive for this thesis, applying partial UMAP to strategically down-sampled subsets or specific pre-segmented cohorts could unlock complex non-linear relationships.
-Furthermore, these non-linear projections could be paired with density-based or probabilistic clustering algorithms, such as Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) or Gaussian Mixture Models (GMM).
+Furthermore, these non-linear projections could be paired with density-based or probabilistic clustering algorithms, such as Hierarchical Density-Based Spatial Clustering of Applications with Noise (so-called HDBSCAN) or Gaussian Mixture Models (GMM).
 Specifically, GMM would be highly beneficial for addressing the cluster overlap observed in the current results.
 Because GMM utilize a soft clustering approach, they assign a mathematical probability of an account belonging to multiple clusters rather than forcing a strict, deterministic boundary.
 This probabilistic framework accurately mirrors the fluid, overlapping realities of retail banking behavior and would serve as a powerful evolution of the methodology presented in this research.
@@ -1059,23 +1047,13 @@ Quantifying the precise interplay between these advanced seeding routines and ac
 \chapter{Conclusion}
 \label{chap:Conclusion}
 
-The modern retail banking landscape requires robust, scalable methodologies to distill vast, high-dimensional transactional data into actionable insights.
-This thesis successfully designed, evaluated, and implemented an end-to-end unsupervised machine learning pipeline.
-It cleanly translates complex credit card portfolio data into distinct, economically meaningful customer archetypes.
-Algorithmic segmentation cannot rely on raw computational power alone. This reality was demonstrated by systematically deploying our architecture across three configurations: the data-agnostic naive Baseline, the domain-curated normal case, and the optimized improved case.
-Analytical success requires a highly curated hybrid framework. The empirical findings establish that deterministic heuristic pre-segmentation is structurally vital.
-Group Z represents a massive dormant sub-population containing 33.79\% of the total portfolio.
-Isolating these operational extremes prevents the primary partitioning models from collapsing into trivial density divides.
-The algorithms can then optimize exclusively for genuine behavioral variance within the active majority.
-Furthermore, this study highlights the mathematical necessity of domain-driven feature engineering and rigid spatial boundaries.
-These options are far superior to data-agnostic dimensionality reduction. Bounding our feature representations via min-max scaling effectively preserved the intrinsic, zero-bounded proportional geometries of financial variables.
-Conversely, robust scaling led to near-degenerate partitions. Concurrently, implementing our custom domain-weighting function proved critical.
-It fractured primitive, binary spatial groupings into a richer, actionable four-cluster structure where $K=4$.
-Under these optimized conditions, standard $K$-means clustering emerged as the most efficient and robust partition engine.
-It generates cohesive sub-populations while operating near-instantaneously compared to the high computational overhead of $K$-medians.
-Ultimately, this thesis bridges the gap between theoretical cluster optimization and practical financial strategy.
-The resulting customer archetypes move beyond simple, manual heuristics to capture latent, multivariate transactional habits.
-Supported by empirical evidence of year-over-year longitudinal stability exceeding 50\% retention, this methodology provides Avarda Bank AB with a reliable, data-driven foundation for lifecycle portfolio management, targeted customer engagement, and future advancements in dynamic behavioral modeling.
+The modern retail banking landscape requires scalable methodologies to extract insights from large, high-dimensional transactional datasets. This thesis presents the design, evaluation, and implementation of an unsupervised machine learning pipeline that maps credit card portfolio data into distinct, interpretable customer segments. 
+
+The results indicate that effective algorithmic segmentation extends beyond reliance on computational power alone, as demonstrated by evaluating the architecture across three configurations: a data-agnostic baseline, a domain-curated case, and an optimized variation. The empirical findings suggest that a structured hybrid framework, incorporating deterministic heuristic pre-segmentation, is important for overall model performance. For instance, group Z represents a large inactive segment containing 33.79\% of the total portfolio. Isolating this subgroup prevents the primary partitioning models from converging around density imbalances, allowing the algorithms to focus on the remaining behavioral variance within the active majority.
+
+Furthermore, this study demonstrates the utility of domain-driven feature engineering and defined spatial boundaries over data-agnostic dimensionality reduction. Bounding the feature representations via min-max scaling preserved the zero-bounded proportional geometries of the financial variables, whereas robust scaling led to poorly defined clusters. Additionally, incorporating a custom domain-weighting function allowed the pipeline to resolve a more granular four-cluster structure ($K=4$) instead of simpler binary groupings. Under these conditions, standard $K$-means clustering provided a stable and computationally efficient partitioning method, generating cohesive sub-populations with significantly less overhead than $K$-medians.
+
+In conclusion, this thesis connects theoretical cluster optimization with practical application in financial strategy. The resulting customer segments supplement traditional manual heuristics by capturing underlying multivariate transactional habits. Supported by evidence of year-over-year longitudinal stability exceeding 50\% retention, this methodology provides Avarda Bank AB with a data-driven framework for portfolio management, customer engagement, and future behavioral modeling.
 
 \appendix
 \chapter*{Appendices}
