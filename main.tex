@@ -261,7 +261,10 @@ Subsequently, it details the mathematical principles behind unsupervised machine
         Features that exhibit Near-Zero Variance (NZV) contribute negligible discriminatory power to the clustering process \cite{ochoteco_asensio_predicting_2022}.
         To mathematically formalize this, let $x_j$ denote the $j$-th feature vector across $n$ observations.
         The sample variance for this feature is calculated as:
-        $$s_j^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_{ij} - \bar{x}_j)^2$$
+        \begin{equation}
+            s_j^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_{ij} - \bar{x}_j)^2
+        \end{equation}
+        
         where $x_{ij}$ represents the value of the $j$-th feature for the $i$-th observation, and $\bar{x}_j$ is the sample mean of feature $j$.
         To address uninformative features, NZV filtering is employed as a primary feature selection step, algorithmically pruning features that fail to meet a predefined minimum variance threshold, $\tau_{nzv}$.
         Thus, any feature $j$ satisfying the condition $s_j^2 \le \tau_{nzv}$ is systematically removed from the feature space.
@@ -272,7 +275,10 @@ Subsequently, it details the mathematical principles behind unsupervised machine
         In a Euclidean space, two perfectly correlated features will mathematically exert twice the weight on the distance calculation as a single, independent feature.
         To neutralize this structural bias, correlation thresholding is applied to prune redundant variables using the sample Pearson correlation coefficient, $\rho$.
         For any pair of features $x_j$ and $x_k$, the correlation is defined as:
-        $$\rho_{j,k} = \frac{\sum_{i=1}^{n} (x_{ij} - \bar{x}_j)(x_{ik} - \bar{x}_k)}{\sqrt{\sum_{i=1}^{n} (x_{ij} - \bar{x}_j)^2} \sqrt{\sum_{i=1}^{n} (x_{ik} - \bar{x}_k)^2}}$$
+        \begin{equation}
+            \rho_{j,k} = \frac{\sum_{i=1}^{n} (x_{ij} - \bar{x}_j)(x_{ik} - \bar{x}_k)}{\sqrt{\sum_{i=1}^{n} (x_{ij} - \bar{x}_j)^2} \sqrt{\sum_{i=1}^{n} (x_{ik} - \bar{x}_k)^2}}
+        \end{equation}
+        
         An absolute correlation threshold is established, which in this research is bounded at a strict magnitude of $\tau_{corr} = 0.90$.
         When a pair of features exhibits a linear relationship exceeding this limit, where $|\rho_{j,k}| > \tau_{corr}$, one feature from the pair is algorithmically removed.
         This process ensures an orthogonal, balanced feature space that prevents heavily correlated variables from dominating the subsequent clustering objective function \cite{mangal_comparative_2018}.
@@ -303,7 +309,7 @@ This chapter outlines the data pipeline and machine learning workflow developed 
 
     \section{Data acquisition and structure}
     \label{sec:data_acquisition}
-    The dataset consists of annual-level data containing approximately one million observations across the years 2024 and 2025. Each observation represents a specific credit card agreement at a single cross-section in time, characterized by over 580 raw features. To maintain a consistent unit of analysis, individual records are tracked using a multi-index comprising of the customer agreement ID and the data year of aggregation. 
+    The dataset consists of annual-level data containing approximately one million observations across the years 2024 and 2025. Each observation represents a specific credit card agreement at a single cross-section in time, characterized by over 580 raw features. To maintain a consistent unit of analysis, individual records are tracked using a multi-index comprising the customer agreement ID and the data year of aggregation. 
     
     This baseline temporal and spatial data structure was selected based on two primary methodological rationales. First, utilizing an annual aggregation window helps smooth out temporary fluctuations. Because transactional data contains high short-term variance and noise driven by seasonal factors—such as holiday shopping periods or vacation spending—aggregating the raw transactional logs into annual snapshots isolates stable lifestyle habits and macro-level behavior rather than short-lived variations in spending velocity. 
     
