@@ -1026,11 +1026,11 @@ By isolating a specific macro-cluster, such as the highly populated transitional
 \section{Non-linear dimensionality reduction and soft clustering}
 To prioritize explicit business interpretability, linear efficiency, and computational scale, this study primarily relied on PCA and algorithms optimizing the $L_2$ norm.
 While this linear approach is highly effective as an initial, explainable clustering strategy, high-dimensional financial data frequently lies on complex, non-linear manifolds.
-Future methodologies should investigate the utilization of Uniform Manifold Approximation and Projection, or UMAP.
+Future methodologies should investigate the utilization of UMAP.
 Although running UMAP on the full population was computationally prohibitive for this thesis, applying partial UMAP to strategically down-sampled subsets or specific pre-segmented cohorts could unlock complex non-linear relationships.
-Furthermore, these non-linear projections could be paired with density-based or probabilistic clustering algorithms, such as HDBSCAN or Gaussian Mixture Models.
-Specifically, Gaussian Mixture Models would be highly beneficial for addressing the cluster overlap observed in the current results.
-Because Gaussian Mixture Models utilize a soft clustering approach, they assign a mathematical probability of an account belonging to multiple clusters rather than forcing a strict, deterministic boundary.
+Furthermore, these non-linear projections could be paired with density-based or probabilistic clustering algorithms, such as Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) or Gaussian Mixture Models (GMM).
+Specifically, GMM would be highly beneficial for addressing the cluster overlap observed in the current results.
+Because GMM utilize a soft clustering approach, they assign a mathematical probability of an account belonging to multiple clusters rather than forcing a strict, deterministic boundary.
 This probabilistic framework accurately mirrors the fluid, overlapping realities of retail banking behavior and would serve as a powerful evolution of the methodology presented in this research.
 
 \section{Alternative algorithmic engines and initialization protocols}
