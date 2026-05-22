@@ -299,16 +299,15 @@ Subsequently, it details the mathematical principles behind unsupervised machine
 \chapter{Methodology}
 \label{chap:Methodology}
 
-This chapter outlines the data pipeline and machine learning workflow developed for this thesis.
-First, the end-to-end mathematical pipeline is detailed, from initial data acquisition through preprocessing, feature engineering, and the final application of unsupervised clustering algorithms.
-Finally, the chapter concludes by outlining the specific experimental cases designed to test this pipeline under different operational scenarios.
-    
+This chapter outlines the data pipeline and machine learning workflow developed for this thesis. The structure of the chapter follows the sequential progression of the data pipeline: data acquisition, preprocessing, feature engineering, and unsupervised clustering. This specific sequence ensures that the dataset is systematically cleaned, filtered, and transformed before partitioning algorithms are applied, preventing raw database artifacts and noise from biasing the models.
+
     \section{Data acquisition and structure}
     \label{sec:data_acquisition}
-    The initial dataset consists of annual-level data containing approximately one million observations.
-    Each observation represents a specific customer agreement at a given point in time, characterized by over 580 distinct features.
-    To maintain a consistent unit of analysis, individual rows are tracked and treated as independent observations using a multi-index comprising \texttt{Agreement\_ID} and \texttt{Year}.
-    This structure allows for the tracking of account behavior over multiple periods while treating each annual snapshot as a distinct data point in the feature space.
+    The dataset consists of annual-level data containing approximately one million observations across the years 2024 and 2025. Each observation represents a specific credit card agreement at a single cross-section in time, characterized by over 580 raw features. To maintain a consistent unit of analysis, individual records are tracked using a multi-index comprising of the customer agreement ID and the data year of aggregation. 
+    
+    This baseline temporal and spatial data structure was selected based on two primary methodological rationales. First, utilizing an annual aggregation window helps smooth out temporary fluctuations. Because transactional data contains high short-term variance and noise driven by seasonal factors—such as holiday shopping periods or vacation spending—aggregating the raw transactional logs into annual snapshots isolates stable lifestyle habits and macro-level behavior rather than short-lived variations in spending velocity. 
+    
+    Second, treating the annual snapshots independently addresses the non-stationary nature of financial behavior. A customer's financial context, risk profile, and card utilization can change significantly from 2024 to 2025 due to shifts in income, employment, or credit needs. Bounding the data points strictly by year and treating them as independent observations allows the model to capture these distinct behavioral states accurately. This setup prevents historical habits from obscuring new behavioral trends, and it establishes the necessary foundation for the longitudinal transition analysis presented in the results.
     
     \section{Data preprocessing and heuristic exclusions}
     \label{sec:preprocessing}
@@ -330,19 +329,17 @@ Finally, the chapter concludes by outlining the specific experimental cases desi
     \section{Feature engineering and transformation}
     \label{sec:feature_engineering}
     To manage dimensionality and ensure the models train on high-signal data, a standardized sequence of feature transformations and algorithmic filtration is applied to the dataset.
-    
+
         \subsection{Logarithmic transformation}
-        An experimental logarithmic transformation, \texttt{log1p}, is investigated as an optional preprocessing step to handle the extreme positive skewness typical of financial data.
-        When enabled, this transformation is exclusively applied to aggregated transactional sum data, leaving other metric types such as counts, limits, and percentages in their original scale.
-        Crucially, because this logarithmic transformation fundamentally alters the variance and the linear relationships between variables, its application directly impacts all subsequent filtration steps.
-        Consequently, toggling this transformation dynamically changes the final feature space across all tested models.
+        \label{subsec:log_transform}
+        An experimental logarithmic transformation, \texttt{log1p}, is investigated as an optional preprocessing step to handle the extreme positive skewness typical of financial data. When enabled, this transformation is exclusively applied to aggregated transactional sum data, leaving other metric types such as counts, limits, and percentages in their original scale. This selective application is mathematically necessary due to the structural differences between feature types. Financial volumes span multiple orders of magnitude and are heavily right-skewed, meaning a small percentage of extreme accounts controls most of the variance. The logarithmic transformation compresses this long tail to prevent outliers from dominating distance calculations. Conversely, indicators such as transaction counts, risk limits, and utilization ratios are naturally bounded or structurally constrained. Applying a logarithmic transformation to these metrics would compress meaningful linear differences, making it harder for distance-based models to detect distinct variations in account behavior. Crucially, because this logarithmic transformation fundamentally alters the variance and the linear relationships between variables, its application directly impacts all subsequent filtration steps. Consequently, toggling this transformation dynamically changes the final feature space across all tested models.
         
         \subsection{Algorithmic filtration}
-        Following the transformation phase, automated data-agnostic filtration is applied to reduce computational bloat.
-        First, a NZV filter with a strict threshold of $10^{-4}$ is implemented to discard non-informative, largely static features.
-        Subsequently, applying the correlation bounds discussed in Chapter \ref{chap:Background}, a filter is applied to mitigate multicollinearity, dropping variables with a Pearson correlation coefficient exceeding 0.90.
-        This ensures the retention of only the most distinct, non-redundant behavioral proxies.
+        \label{subsec:nzv_filtering_method}
+        Following the transformation phase, automated data-agnostic filtration is applied to reduce computational bloat and eliminate redundant information. First, a near-zero variance filter with a strict threshold of $10^{-4}$ is implemented to discard non-informative, largely static features. Features that exhibit near-zero variance across the entire portfolio add flat coordinate baselines to the distance equations. Because they do not vary significantly between observations, they increase computational overhead without contributing discriminatory power to separate customer segments.
         
+        Subsequently, a filter is applied to mitigate multicollinearity by dropping variables with a Pearson correlation coefficient exceeding an absolute magnitude of 0.90. In a distance-based metric space, if two features are highly collinear, such as total spend volume and average transaction size, that underlying behavioral dimension is effectively counted twice. This duplication artificially inflates the structural importance of that behavior during centroid optimization and skews the geometric boundaries of the resulting clusters. Applying correlation thresholding ensures an orthogonal, balanced feature space where each distinct behavioral proxy exerts an independent weight on the objective function.
+                
     \section{Scaling and domain-specific weighting}
     \label{sec:scaling}
     Because distance-based clustering algorithms are highly sensitive to the magnitude of the input variables, rigorous scaling methodologies were required.
@@ -350,7 +347,7 @@ Finally, the chapter concludes by outlining the specific experimental cases desi
         \subsection{Normalization techniques}
         Before applying global scalers, manual pre-normalization is applied to naturally bounded features.
         For example, utilization rates are explicitly scaled by dividing by 100 to map them to a strict continuous range without distorting their original proportional meaning.
-        Following this, three distinct global scaling techniques are evaluated across the pipeline: min-max Scaler, robust Scaler, and Standard Scaler.
+        Following this, three distinct global scaling techniques are evaluated across the pipeline: min-max, robust, and standard scaling.
         Testing multiple scalers ensures that the final clusters are driven by genuine behavioral patterns rather than artifacts introduced by forced normal distributions or outlier sensitivities.
         
         \subsection{Feature weighting}
@@ -369,49 +366,38 @@ Finally, the chapter concludes by outlining the specific experimental cases desi
     Given the scale of the dataset, dimensionality reduction techniques were evaluated to compress the feature space and improve algorithmic efficiency prior to spatial clustering.
     
         \subsection{Principal component analysis}
-        PCA is incorporated as an optional experimental variable.
-        The methodology systematically investigates and compares clustering outcomes both with and without PCA to objectively assess its necessity.
-        When enabled, PCA dynamically projects the features into a lower-dimensional space while retaining a target cumulative variance, attempting to mitigate the curse of dimensionality.
+        \label{subsec:pca}
+        PCA is incorporated into the pipeline as an optional experimental variable rather than a default preprocessing step. The methodology systematically investigates and compares clustering outcomes both with and without PCA to objectively assess its necessity. When enabled, PCA projects the filtered features into a lower-dimensional orthogonal space while retaining a target cumulative variance, which helps mitigate the curse of dimensionality and accelerates optimization. However, this orthogonal transformation shifts the data into abstract principal components that represent linear combinations of the original variables, thereby obscuring direct feature interpretation. Because the final customer segments must eventually be delivered to non-technical business stakeholders who require explicit, deterministic rules for product campaigns and capital allocation, retaining direct linear interpretability is an operational priority. Treating PCA as an optional parameter allows the pipeline to empirically evaluate whether the mathematical improvements in spatial density and convergence speed justify the loss of direct behavioral explanation.
         
-        \subsection{Alternative methods: Manifold learning}
-        Alternative non-linear dimensionality reduction techniques were also considered, specifically Uniform Manifold Approximation and Projection.
-        However, preliminary testing revealed that applying UMAP to a dense dataset of approximately one million observations was computationally infeasible without aggressive down-sampling.
-        To maintain the structural integrity of the full population analysis, UMAP is excluded from the primary quantitative methodology.
+        \subsection{Alternative methods: manifold learning}
+        \label{subsec:manifold}
+        Alternative non-linear dimensionality reduction techniques were also considered during the development of the pipeline, specifically UMAP. UMAP is effective at capturing complex, non-linear patterns and preserving both local and global geometric relationships within datasets. However, preliminary testing revealed that constructing the high-dimensional fuzzy topological graphs required by UMAP was too computationally intensive for a dense matrix containing nearly one million annual observations, leading to processing bottlenecks. Utilizing UMAP within the primary workflow would have necessitated aggressive random down-sampling of the dataset. Because a primary objective of this thesis is to execute a full-population analysis on the active credit card base without data loss or sampling bias, UMAP was excluded from the final quantitative pipeline in favor of more scalable partitioning configurations.
         
     \section{Clustering algorithms}
     \label{sec:clustering_algorithms}
-    The core of the machine learning workflow relies on distance-based, unsupervised partitioning algorithms to identify latent customer archetypes.
+    The core of the machine learning workflow relies on distance-based, unsupervised partitioning algorithms to identify latent customer archetypes from the engineered feature space.
     
         \subsection{Model selection}
-        The primary algorithms evaluated are $K$-means and $K$-medians.
-        Standard $K$-means is tested for its efficiency in variance minimization and its widespread baseline acceptance.
-        Conversely, $K$-medians is evaluated to explicitly address the extreme outliers and heavy-tailed distributions inherent in financial transaction data.
-        By minimizing the Manhattan distance, or $L_1$ norm, rather than the squared Euclidean distance, $L_2$ norm, it offers a theoretically more robust partitioning of skewed variables.
-        Additionally, the computational viability of mini-batch $K$-means is briefly assessed as a highly scalable alternative.
+        \label{subsec:model_selection}
+        The primary algorithms evaluated in this research are $K$-means and $K$-medians. Partitioning models were deliberately prioritized over complex, non-linear deep architectures because they establish a transparent baseline characterized by strong global consensus and linear explainability. In a retail banking environment, corporate stakeholders require deterministic rules to authorize capital allocation and product campaigns, making geometric transparency highly valuable. Furthermore, these partitioning frameworks provide an exceptionally scalable foundation for production environments. Because their mathematical structures rest on straightforward centroid or median shifts, they can easily adapt to modern large-scale extensions such as mini-batch optimizations and online streaming update rules. This algorithmic scalability ensures that the core architecture remains computationally viable and efficient even as the bank's underlying transaction volumes and portfolio sizes grow over time.
         
         \subsection{Hyperparameter tuning}
-        Determining the optimal number of customer segments, or clusters, denoted as $K$, is critical.
-        Across all testing phases, the value of $K$ is tuned by evaluating a range of cluster counts against two primary objective metrics.
-        Inertia, representing the WCSS, is used to identify structural elbow points, while the silhouette score is used to quantify global cluster cohesion and separation.
-        Most of the initial results focused primarily on the silhouette score as it provided an interpretable metric to evaluate partition quality.
-        However, calculating the exact pairwise silhouette coefficient over the entire dataset requires $\mathcal{O}(n^2)$ space and time complexity, which is computationally intractable for approximately one million observations.
-        To mitigate this bottleneck while maintaining statistical validity, a stratified random sample of $n = 50,000$ observations was leveraged to provide a representative and computationally viable evaluation space.
+        \label{subsec:hyperparameter_tuning}
+        Determining the optimal number of customer segments, denoted as $K$, requires tuning the models across a range of cluster counts against quantitative objective metrics. Inertia is evaluated to identify structural elbow points where the rate of intra-cluster variance reduction begins to sharply diminish. Concurrently, the silhouette score is used to measure and maximize global cluster cohesion and separation. However, calculating the exact pairwise silhouette coefficient over the entire dataset requires $\mathcal{O}(n^2)$ space and time complexity, which is computationally intractable for approximately one million observations. To mitigate this computational bottleneck without sacrificing statistical validity, a stratified random sample of 50,000 observations was leveraged as an evaluation space. This stratified sampling approach preserves the original cluster proportions and density distributions of the full population, providing a representative and computationally viable framework to mathematically determine the optimal partition count.
         
     \section{Cluster profiling and interpretation}
     \label{sec:cluster_profiling}
-    Following algorithmic partitioning, the resulting mathematical clusters must be translated back into actionable financial insights.
+    Following algorithmic partitioning, the resulting mathematical clusters must be translated back into actionable financial insights to ensure they are useful for strategic decision-making.
     
         \subsection{Evaluation in original feature space}
-        Because distance algorithms require normalized data to function, the raw outputs lack immediate business context.
-        To resolve this, all resulting cluster assignments are mapped directly back to the original, unscaled dataset.
-        This ensures that the final customer archetypes are profiled using actual monetary transaction sums, genuine utilization percentages, and exact count metrics.
+        \label{subsec:original_space_evaluation}
+        Because distance-based algorithms require scaled and normalized data to optimize their objective functions without dimensional bias, the raw cluster outputs exist in an abstract vector space that lacks immediate business context. To resolve this limitation, all resulting cluster assignments are mapped directly back to the original, unscaled dataset. This mapping is methodologically necessary because normalized values obscure the actual physical units of banking operations. Evaluating the customer archetypes in the original feature space allows analysts and business managers to interpret the performance of each cluster using concrete, real-world metrics, such as actual monetary transaction sums, genuine utilization percentages, and exact transaction count profiles. 
         
         \subsection{Visualization and temporal dynamics}
-        To profile the segments, comparative statistical visualizations, including customized boxplots and median-centric comparative analyses, are utilized to isolate defining financial characteristics.
-        Finally, the methodology concludes by examining temporal dynamics to quantify customer segment transitions.
-        This analysis is restricted to accounts possessing multiple annual observations, specifically two observations given the delimited 2024 to 2025 timeframe.
-        By tracking the assigned cluster label for each unique \texttt{Agreement\_ID} across both periods, a temporal transition matrix is constructed using a cross-tabulation of the initial and subsequent cluster assignments.
-        These raw transition counts are then row-normalized to yield empirical transition probabilities, detailing the exact percentage of accounts that either migrated to a new behavioral archetype or remained stable within their original cluster over the observed period.
+        \label{subsec:temporal_dynamics_method}
+        To profile the segments, comparative statistical visualizations, including customized boxplots and median-centric comparative analyses, are utilized to isolate defining financial characteristics across groups. Finally, the methodology concludes by examining temporal dynamics to examine customer segment transitions over time. Credit card behavior is inherently fluid, and analyzing a snapshot from a single year can obscure long-term trends or stability. To capture these shifting patterns, the analysis tracks accounts possessing multiple annual observations across the delimited 2024 to 2025 timeframe using a cross-tabulation of the initial and subsequent cluster assignments.
+        
+        The raw migration counts within this cross-tabulation are row-normalized to construct an empirical transition probability matrix. Row-normalization is mathematically required because the baseline sizes of the clusters vary significantly. By converting raw transaction counts into uniform proportions, the matrix provides a standardized measure of behavioral stickiness across all customer segments. This approach allows the model to shift from a static partitioning tool to a dynamic lifecycle framework, enabling the bank to quantify the exact probability that an account will either remain stable within its current behavioral tier or migrate to a new operational archetype in the following fiscal year.
         
     \section{Experimental design: Pipeline configurations}
     \label{sec:experimental_design}
